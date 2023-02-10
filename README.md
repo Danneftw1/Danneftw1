@@ -5,6 +5,21 @@ Openminded, ambitious, problemsolver that is a flexible worker and thrives in a 
 
 I'm also quite the drummer, and passionate about music :wink::chopsticks:
 
+## :briefcase: Portfolio:
+| Repo                           | Description                        |
+| ------------------------------ | ---------------------------------- |
+|[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics|
+|[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data
+|[Geometry Shapes Class][gs]     | Used OOP to create a well-structured program|
+|[Machine Learning Program][mla] | Classifying types with ML algorithm
+
+<!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
+
+[pr]: https://github.com/Danneftw1/Projekt-Databehandling
+[c]: https://github.com/Danneftw1/Databehandling-Daniel-Nilsson/tree/main/Labb_1
+[gs]:https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/geometry_shapes.py
+[mla]: https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/Labb.ipynb
+
 ## 🌐 Socials:
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://linkedin.com/in/https://www.linkedin.com/in/daniel-nilsson-dn/) 
 
