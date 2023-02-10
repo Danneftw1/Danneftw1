@@ -21,7 +21,7 @@ I'm also quite the drummer, and passionate about music :wink::chopsticks:
 [mla]: https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/Labb.ipynb
 
 ## 🌐 Socials:
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](daniel-nilsson-a3a65b241/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](/daniel-nilsson-a3a65b241/)
 
 
 [linkedin]: https://www.linkedin.com/in/daniel-nilsson-a3a65b241/
