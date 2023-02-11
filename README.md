@@ -9,7 +9,7 @@ Openminded, ambitious, problemsolver who is a flexible worker and thrives in a g
 I'm also quite the drummer, and I love music :wink::chopsticks:
 
 ## :briefcase: Portfolio:
-| Repo                           | Description                        |
+| Repositories                   | Description                        |
 | ------------------------------ | ---------------------------------- |
 |[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics|
 |[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data|
