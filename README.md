@@ -2,7 +2,7 @@
 
 ![Banner](banner.png)
 
-Aspiring python master and passionate about IT. Currently studying AI & Machine learning at IT-högskolan in Gothenburg, Sweden.
+Aspiring programmer who is passionate about tech. Currently studying AI & Machine learning at IT-högskolan in Gothenburg, Sweden.
 
 Openminded, ambitious, problemsolver who is a flexible worker and thrives in a group with good synergy, but also has an ability to work alone aswell.
 
