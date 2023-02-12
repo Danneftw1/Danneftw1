@@ -11,10 +11,10 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 ## :briefcase: Portfolio:
 | Repositories                   | Description                        | Course                    |
 | ------------------------------ | ---------------------------------- | ------------------------- |
-|[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics | Data Processing |
-|[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data                    | Data Processing |                                    
-|[Geometry Shapes Class][gs]     | Used OOP to create a well-structured program | Python Programming |
 |[Machine Learning Program][mla] | Classifying types with ML algorithm          | Python Programming |
+|[Geometry Shapes Class][gs]     | Used OOP to create a well-structured program | Python Programming |
+|[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data                    | Data Processing | 
+|[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics | Data Processing |                                   
 |[Statistical Methods][sg]       | Graphs & data created using statistical consepts| Statistical Models |
 
 <!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
