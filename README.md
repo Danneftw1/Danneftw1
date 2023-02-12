@@ -9,13 +9,13 @@ Openminded, ambitious, problemsolver who is a flexible worker and thrives in a g
 I'm also quite the drummer, and I love music :wink::chopsticks:
 
 ## :briefcase: Portfolio:
-| Repositories                   | Description                        |
-| ------------------------------ | ---------------------------------- |
-|[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics|
-|[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data|
-|[Geometry Shapes Class][gs]     | Used OOP to create a well-structured program|
-|[Machine Learning Program][mla] | Classifying types with ML algorithm|
-|[Statistical Methods][sg]       | Graphs & data created with statistical models|
+| Repositories                   | Description                        | Course                    |
+| ------------------------------ | ---------------------------------- | ------------------------- |
+|[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics | Data Processing |
+|[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data                    | Data Processing |                                    
+|[Geometry Shapes Class][gs]     | Used OOP to create a well-structured program | Python Programming |
+|[Machine Learning Program][mla] | Classifying types with ML algorithm          | Python Programming |
+|[Statistical Methods][sg]       | Graphs & data created with statistical consepts| Statistical Models |
 
 <!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
 
