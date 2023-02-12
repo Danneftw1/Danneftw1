@@ -2,7 +2,7 @@
 
 ![Banner](banner.png)
 
-Aspiring programmer who is passionate about tech. Currently studying AI & Machine learning at IT-högskolan in Gothenburg, Sweden.
+Aspiring programmer who is passionate about tech. Currently studying AI & Machine learning at IT-högskolan in Gothenburg, Sweden. If you want to learn about what my education consists of, check out my [educational summary][es]
 
 Openminded, ambitious, problemsolver who is a flexible worker and thrives in a group with good synergy, but also has an ability to work alone aswell.
 
@@ -24,7 +24,7 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 [gs]:https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/geometry_shapes.py
 [mla]: https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/Labb.ipynb
 [sg]: https://github.com/Danneftw1/Statistik/blob/main/Inl%C3%A4mning.ipynb
-
+[es]: https://github.com/Danneftw1/Portfolio-Daniel-Nilsson/blob/main/Courses_info.md
 
 ## 🌐 Socials:
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/daniel-nilsson-dn/)
