@@ -15,7 +15,7 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 |[Covid-19 Dataframe Plotting][c]| Visualizing Covid-19 data                    | Data Processing |                                    
 |[Geometry Shapes Class][gs]     | Used OOP to create a well-structured program | Python Programming |
 |[Machine Learning Program][mla] | Classifying types with ML algorithm          | Python Programming |
-|[Statistical Methods][sg]       | Graphs & data created with statistical consepts| Statistical Models |
+|[Statistical Methods][sg]       | Graphs & data created using statistical consepts| Statistical Models |
 
 <!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
 
