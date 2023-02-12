@@ -2,7 +2,7 @@
 
 ![Banner](banner.png)
 
-Aspiring programmer who is passionate about tech. Currently studying AI & Machine learning at IT-högskolan in Gothenburg, Sweden. If you want to learn about what my education consists of, check out my [educational summary][es]
+Aspiring programmer who is passionate about tech. Currently studying AI & Machine learning at IT-högskolan in Gothenburg, Sweden. If you want to learn about what my education consists of, check out my [education summary][es]
 
 Openminded, ambitious, problemsolver who is a flexible worker and thrives in a group with good synergy, but also has an ability to work alone aswell.
 
