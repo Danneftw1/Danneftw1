@@ -19,7 +19,7 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 
 <!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
 
-[pr]: https://github.com/Danneftw1/Projekt-Databehandling
+[pr]: https://olympics-dashboard-sweden.herokuapp.com/
 [c]: https://github.com/Danneftw1/Databehandling-Daniel-Nilsson/tree/main/Labb_1
 [gs]:https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/geometry_shapes.py
 [mla]: https://github.com/Danneftw1/Python-Daniel-Nilsson/blob/main/Labbar/Labb.ipynb
