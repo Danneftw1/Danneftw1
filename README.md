@@ -17,7 +17,7 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 |[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics | Data Processing |                                   
 |[Statistical Methods][sg]       | Graphs & data created using statistical consepts| Statistical Models |
 |[Personalized Recommendation System][rs] | Recommendation system for movies | Machine Learning |
-|Cardiovascular Disease Prediction | *Currently being worked on* | Machine Learning | 
+|Cardiovascular Disease Prediction[dp] | Using ML models to predict CVD | Machine Learning | 
 
 <!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
 
@@ -28,7 +28,7 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 [sg]: https://github.com/Danneftw1/Statistik/blob/main/Inl%C3%A4mning.ipynb
 [es]: https://github.com/Danneftw1/Portfolio-Daniel-Nilsson/blob/main/Courses_info.md
 [rs]: https://github.com/Danneftw1/Machine-learning/blob/main/Labb/Labb_1_.ipynb
-[dp]: 
+[dp]: https://github.com/Danneftw1/Machine-learning/tree/main/Labb
 
 ## 🌐 Socials:
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/daniel-nilsson-dn/)
