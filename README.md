@@ -17,7 +17,7 @@ I'm also quite the drummer, and I love music :wink::chopsticks:
 |[Olympics Dashboard][pr]        | Interactive dashboard about Olympics metrics | Data Processing |                                   
 |[Statistical Methods][sg]       | Graphs & data created using statistical consepts| Statistical Models |
 |[Personalized Recommendation System][rs] | Recommendation system for movies | Machine Learning |
-|Cardiovascular Disease Prediction[dp] | Using ML models to predict CVD | Machine Learning | 
+|[Cardiovascular Disease Prediction][dp] | Using ML models to predict CVD | Machine Learning | 
 
 <!-- | [Programmering 1][prog1]           | first programming course (gymnasiet)   | -->
 
