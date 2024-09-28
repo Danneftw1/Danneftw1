@@ -2,7 +2,7 @@
 
 ![Banner](banner.png)
 
-Developer specializing in AI and machine learning who is passionate about tech. Currently working as a innovation developer at the consulting firm Quokka in Gothenburg, Sweden.
+I'm a developer specializing in AI and machine learning, who has also started my journey within Frontend development. Passionate about tech. Currently working as a innovation developer at the consulting firm Quokka in Gothenburg, Sweden.
 
 I'm also quite the drummer, and I love music :wink::chopsticks:
 
