@@ -1,0 +1,13 @@
+{
+  "name": "danneftw1-profile",
+  "private": true,
+  "description": "GitHub profile README. The artwork is generated; both tools live in tools/.",
+  "scripts": {
+    "build": "python3 tools/build-assets.py",
+    "check": "node tools/check-readme.mjs",
+    "test": "npm run build && npm run check"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}
