@@ -1,7 +1,8 @@
 # Keeps the one law this repo has: the profile has to look right on a phone,
-# in both of GitHub's themes. The check draws the artwork at 390, 430 and
-# 896 px and reads README.md for alt text, paired light/dark sources and
-# third-party images.
+# in both of GitHub's themes, in the light-on-dark fallback the mobile apps
+# show, and with motion off. The check draws the README's own image blocks at
+# 390, 430 and 896 px in all four and reads README.md for alt text, paired
+# sources and third-party images.
 #
 # It deliberately does not rebuild the SVGs. The build fetches fonts from
 # Google's CDN, and a CDN hiccup should never turn this red — the generated
