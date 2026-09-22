@@ -177,7 +177,11 @@ def text_path(name: str, text: str, size: float, tracking: float = 0.0):
     return pen.getCommands(), x - step if text else 0.0
 
 
+MIN_TEXT = 31  # viewBox units at 1100 wide: ~10 CSS px on a 390 px phone
+
+
 def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", opacity=None):
+    assert size >= MIN_TEXT, f"{text!r} set at {size} units, under the {MIN_TEXT}-unit phone floor"
     d, w = text_path(name, text, size, tracking)
     dx = {"start": 0.0, "middle": -w / 2, "end": -w}[anchor]
     op = f' opacity="{opacity}"' if opacity is not None else ""
@@ -185,6 +189,34 @@ def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", opacity=No
         f'<path d="{d}" fill="{fill}"{op} transform="translate({x + dx:.2f} {y})"/>',
         w,
     )
+
+
+def wrap(name: str, text: str, size: float, width: float, tracking: float = 0.0) -> list[str]:
+    """Break `text` into lines no wider than `width`, measuring each candidate
+    line with the same shaper that draws it, so a line never overruns its box
+    because of a kerning pair the estimate did not know about."""
+    lines, line = [], ""
+    for word in text.split():
+        trial = f"{line} {word}".strip()
+        if line and text_path(name, trial, size, tracking)[1] > width:
+            lines.append(line)
+            line = word
+        else:
+            line = trial
+    if line:
+        lines.append(line)
+    for ln in lines:
+        assert text_path(name, ln, size, tracking)[1] <= width, f"{ln!r} is wider than {width} on its own"
+    return lines
+
+
+def paragraph(name, text, size, x, y, width, fill, leading=1.35, tracking=0.0):
+    """Outlined multi-line text: returns (svg, height). `y` is the first baseline."""
+    out = []
+    lines = wrap(name, text, size, width, tracking)
+    for i, ln in enumerate(lines):
+        out.append(label(name, ln, size, x, round(y + i * size * leading, 1), fill, tracking)[0])
+    return "".join(out), (len(lines) - 1) * size * leading
 
 
 def origin(x: float, y: float) -> str:
@@ -562,6 +594,14 @@ def check_palette() -> None:
                     raise SystemExit(f"{theme}/{surface}: {role} is {r}:1 on its surface, under 3:1")
 
 
+# Every asset the README shows, in page order. One line each: the build writes
+# all four variants, and the check fails on any file here the README skips.
+ASSETS = (
+    ("header", header),
+    ("pipeline", pipeline),
+)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(ROOT / "assets"))
@@ -570,7 +610,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     check_palette()
     for theme, tokens in THEMES.items():
-        for stem, draw in (("header", header), ("pipeline", pipeline)):
+        for stem, draw in ASSETS:
             for suffix, motion in (("", True), ("-static", False)):
                 path = out / f"{stem}{suffix}-{theme}.svg"
                 path.write_text(draw(tokens, motion), encoding="utf-8")
