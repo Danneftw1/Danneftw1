@@ -93,7 +93,7 @@ for (const f of built) {
   if (/<script\b/.test(svg)) sins.push("<script>");
   if (/https?:\/\//.test(svg.replace(/xmlns(?::\w+)?="[^"]*"/g, ""))) sins.push("external reference");
   if (!inner(svg, "title") || !inner(svg, "desc")) sins.push("no <title> or <desc>");
-  if (/-static-/.test(f) && /@keyframes|animation[\w-]*\s*:|<animate/.test(svg)) sins.push("a static asset still animates");
+  if (/-static-/.test(f) && /@keyframes|animation[\w-]*\s*:|<(animate|set|mpath)\b|\btransition\s*:/.test(svg)) sins.push("a static asset still animates");
   if (Buffer.byteLength(svg) > 120 * 1024) sins.push(`${(Buffer.byteLength(svg) / 1024).toFixed(0)} kB, over the 120 kB budget`);
   sins.length ? bad(`${f}: ${sins.join(", ")}`) : ok(`${f} is self-contained (${(Buffer.byteLength(svg) / 1024).toFixed(1)} kB)`);
 }
@@ -115,9 +115,9 @@ const textOnly = readme.replace(/<picture>[\s\S]*?<\/picture>/g, "").replace(/\]
 }
 
 // 7. Facts. The page may only state what Daniel's own notes state: the
-//    numbers below are its dates (and the widths this check names in the
-//    footer), links go to his repos or this repo's files, headings are plain.
-const ALLOWED_NUMBERS = new Set(["2009", "2012", "2022", "2024", "390", "430", "896"]);
+//    numbers below are its dates, links go to his repos or this repo's
+//    files, headings are plain.
+const ALLOWED_NUMBERS = new Set(["2012", "2022", "2024", "2025"]);
 const prose = textOnly.replace(/https?:\/\/\S+/g, "").replaceAll("B2C", "");
 const svgWords = built.map((f) => (inner(svgOf(f), "title") || "") + " " + (inner(svgOf(f), "desc") || "")).join(" ");
 const stray = [...new Set([...(prose + " " + svgWords).matchAll(/\d+/g)].map((m) => m[0]).filter((n) => !ALLOWED_NUMBERS.has(n)))];
@@ -211,8 +211,11 @@ ${body}
 //     and the pixels compared with the static file drawn the same way.
 async function drawAt(svgText, seconds) {
   // Legends are print and identical by construction; a paused transform
-  // changes how glyph edges rasterise, so the comparison is of everything
-  // else — caps, faces, glows, pulses — which is what moves.
+  // changes how glyph edges rasterise, so the pixel comparison is of
+  // everything else — caps, faces, glows, pulses — which is what moves.
+  // Alongside the pixels, the moving parts' computed styles are read out
+  // exactly: every pulse's dash offset, every face's transform, every
+  // glow's opacity. Those cannot hide under a pixel threshold.
   svgText = svgText.replace(/<use\b[^>]*\/>/g, "");
   const page = await browser.newPage({ viewport: { width: 716, height: 900 }, deviceScaleFactor: 1 });
   await page.setContent(`<!doctype html><body style="margin:0;background:#888">${svgText}</body>`);
@@ -223,9 +226,19 @@ async function drawAt(svgText, seconds) {
   });
   await page.setViewportSize({ width: 716, height: h });
   if (seconds != null) await page.evaluate((t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } }, seconds);
+  const facts = await page.evaluate(() => {
+    // An unmoved face reads "none" in the still and the identity matrix under a
+    // paused animation; they are the same pose.
+    const cs = (el, prop) => getComputedStyle(el)[prop].replace(/^none$/, "matrix(1, 0, 0, 1, 0, 0)");
+    return {
+      pulses: [...document.querySelectorAll(".p")].map((p) => cs(p, "strokeDashoffset")),
+      faces: [...document.querySelectorAll('[class$="-top"]')].map((g) => cs(g, "transform")),
+      lights: [...document.querySelectorAll('[class$="-glow"], [class$="-face"]')].map((g) => cs(g, "opacity")),
+    };
+  });
   const png = await page.screenshot();
   await page.close();
-  return png;
+  return { png, facts };
 }
 async function diff(a, b) {
   const page = await browser.newPage();
@@ -236,21 +249,23 @@ async function diff(a, b) {
     const ctx = c.getContext("2d");
     ctx.drawImage(ia, 0, 0); const da = ctx.getImageData(0, 0, c.width, c.height).data;
     ctx.drawImage(ib, 0, 0); const db = ctx.getImageData(0, 0, c.width, c.height).data;
-    // A pixel counts as different only if nothing within one pixel of it in
-    // the other image matches its colour: edge anti-aliasing always has a
-    // match next door; a lit glow, a pressed face or a parked pulse does not.
+    // A pixel counts as different only if nothing within two pixels of it in
+    // the other image matches its colour, tested both ways: edge anti-aliasing
+    // always has a match next door; a glow, a face shift or a pulse does not.
     const W = c.width, Hh = c.height;
     const near = (p, q) => Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) + Math.abs(p[2] - q[2]) <= 64;
     const px = (d, x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
     let n = 0;
-    for (let y = 1; y < Hh - 1; y++) for (let x = 1; x < W - 1; x++) {
-      const pa = px(da, x, y);
-      if (near(pa, px(db, x, y))) continue;
-      let found = false;
-      for (let dy = -1; dy <= 1 && !found; dy++) for (let dx = -1; dx <= 1 && !found; dx++) if (near(pa, px(db, x + dx, y + dy))) found = true;
-      if (!found) n++;
+    for (const [d1, d2] of [[da, db], [db, da]]) {
+      for (let y = 2; y < Hh - 2; y++) for (let x = 2; x < W - 2; x++) {
+        const p1 = px(d1, x, y);
+        if (near(p1, px(d2, x, y))) continue;
+        let found = false;
+        for (let dy = -2; dy <= 2 && !found; dy++) for (let dx = -2; dx <= 2 && !found; dx++) if (near(p1, px(d2, x + dx, y + dy))) found = true;
+        if (!found) n++;
+      }
     }
-    return n / ((W - 2) * (Hh - 2));
+    return n / (2 * (W - 4) * (Hh - 4));
   }, [a.toString("base64"), b.toString("base64")]);
   await page.close();
   return r;
@@ -261,8 +276,17 @@ for (const stem of stems) {
     const at = +(attr(moving, "data-still-at") || NaN);
     if (!(at > 0)) { bad(`${stem}-${theme}: no data-still-at, so the still cannot be proved a frame`); continue; }
     const [frame, still] = await Promise.all([drawAt(moving, at), drawAt(svgOf(`${stem}-static-${theme}.svg`), null)]);
-    const d = await diff(frame, still);
-    d <= 0.001 ? ok(`${stem}-${theme}: the still is the frame at ${at}s`) : bad(`${stem}-${theme}: the still differs from the frame at ${at}s on ${(d * 100).toFixed(2)}% of pixels`);
+    const sins = [];
+    for (const k of ["pulses", "faces", "lights"]) {
+      if (frame.facts[k].length !== still.facts[k].length) sins.push(`${k}: ${frame.facts[k].length} moving parts vs ${still.facts[k].length} in the still`);
+      else frame.facts[k].forEach((v, i) => { if (v !== still.facts[k][i]) sins.push(`${k}[${i}] is ${v} in the frame, ${still.facts[k][i]} in the still`); });
+    }
+    const parked = frame.facts.pulses.every((v) => v === "58px");
+    if (!parked) sins.push("a pulse is on a trace at the still's moment");
+    const d = await diff(frame.png, still.png);
+    if (d > 0.004) sins.push(`${(d * 100).toFixed(2)}% of pixels differ`);
+    sins.length ? bad(`${stem}-${theme}: the still is not the frame at ${at}s — ${sins.slice(0, 3).join("; ")}`)
+      : ok(`${stem}-${theme}: the still is the frame at ${at}s (${frame.facts.faces.length} faces, ${frame.facts.lights.length} lights, ${frame.facts.pulses.length} pulses agree)`);
   }
 }
 await browser.close();

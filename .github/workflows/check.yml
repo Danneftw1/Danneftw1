@@ -1,9 +1,11 @@
 # Keeps the laws this repo has. Two jobs' worth of proof in one:
 #
-#   build   rebuilds every asset from tools/build-assets.py with the committed
-#           fonts and fails if the result differs from what is committed — so
-#           a hand-edited SVG, or a generator change without a rebuild, is red.
-#           The palette's contrast and colour-blind checks run inside it.
+#   build   lints the generator (pyflakes: no dead or duplicated code in the
+#           file the README offers as its public example), rebuilds every asset
+#           from it with the committed fonts, and fails if the result differs
+#           from what is committed — so a hand-edited SVG, or a generator change
+#           without a rebuild, is red. The palette's contrast and colour-blind
+#           checks run inside the build.
 #   check   draws the README's own image blocks at 390, 430 and 896 px in both
 #           themes, in the light-on-dark view the GitHub apps show, and with
 #           motion off; lints the page's words, numbers, links and headings;
@@ -13,6 +15,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "0 9 2 * *"   # the 2nd of every month: the year-drift check fires without a push
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -22,8 +26,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r tools/requirements.txt
-      - run: npm run build
-      - run: git diff --exit-code -- assets/
+      - run: python3 -m pyflakes tools/build-assets.py
+      - run: python3 tools/build-assets.py
+      - run: git diff --exit-code -- assets/ && test -z "$(git status --porcelain -- assets/)"
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
