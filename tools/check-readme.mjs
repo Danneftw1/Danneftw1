@@ -57,6 +57,10 @@ for (const [i, p] of pics.entries()) {
   sins.length ? bad(`picture ${i + 1}: ${sins.join(", ")}`) : ok(`picture ${i + 1} follows theme and motion preference`);
 }
 pics.length ? null : bad("no <picture> blocks — the artwork will not follow the reader's theme");
+const stems = pics.map((p) => p.match(/media="\(prefers-color-scheme: light\)" srcset="assets\/([\w-]+)-light\.svg"/)[1]);
+const hasStatic = (stem) => existsSync(join(ROOT, "assets", `${stem}-static-light.svg`));
+// A still is a -static- file, or any panel that has no -static- twin: it never moves.
+const isStill = (f) => /-static-/.test(f) || !hasStatic(f.replace(/-(light|dark)\.svg$/, ""));
 
 // 3. Local only. The artwork is generated in this repo on purpose: no badge
 //    service, no stats widget, nothing that can rot or start tracking readers.
@@ -82,7 +86,8 @@ for (const f of built) {
   if (/<script\b/.test(svg)) sins.push("<script>");
   if (/https?:\/\//.test(svg.replace(/xmlns(?::\w+)?="[^"]*"/g, ""))) sins.push("external reference");
   if (!/<title\b/.test(svg)) sins.push("no <title>");
-  if (/-static-/.test(f) && /@keyframes|animation(?:-delay)?\s*:/.test(svg)) sins.push("a static asset still animates");
+  if (isStill(f) && /@keyframes|animation[\w-]*\s*:|<animate/.test(svg)) sins.push("a still or static asset animates");
+  if (svg.length > 120 * 1024) sins.push(`${(svg.length / 1024).toFixed(0)} kB, over the 120 kB budget`);
   // A transform-origin needs a unit on both axes. "956 132px" is invalid, the
   // browser drops the whole declaration, and the shape then scales from its own
   // middle — which is how the first cut of the banner had bars floating off the
@@ -92,6 +97,43 @@ for (const f of built) {
   if (unitless.length) sins.push(`transform-origin without units: ${unitless[0]}`);
   sins.length ? bad(`${f}: ${sins.join(", ")}`) : ok(`${f} is self-contained (${(svg.length / 1024).toFixed(1)} kB)`);
 }
+
+// 5b. The words behind the pictures. Every image's alt text is the light
+//     file's own <desc>, so the two cannot drift; every tool on the stack panel
+//     is also plain README text, so Ctrl-F and a CV parser find it.
+const textOnly = readme.replace(/<picture>[\s\S]*?<\/picture>/g, "").replace(/\]\([^)]*\)/g, "]");
+for (const m of readme.matchAll(/<img alt="([^"]+)" src="assets\/([\w-]+)-light\.svg"/g)) {
+  const svg = readFileSync(join(ROOT, "assets", `${m[2]}-light.svg`), "utf8");
+  const desc = (svg.match(/<desc[^>]*>([\s\S]*?)<\/desc>/) || [])[1];
+  desc === m[1] ? ok(`${m[2]}: alt text is the file's own <desc>`) : bad(`${m[2]}: alt text and <desc> differ`);
+}
+if (existsSync(join(ROOT, "assets", "stack-light.svg"))) {
+  const desc = readFileSync(join(ROOT, "assets", "stack-light.svg"), "utf8").match(/<desc[^>]*>([\s\S]*?)<\/desc>/)[1];
+  const tools = [...desc.matchAll(/\w+: ([^.]+)\./g)].flatMap((m) => m[1].split(" · "));
+  const lost = tools.filter((tool) => !textOnly.includes(tool));
+  lost.length ? bad(`stack tools missing from README text: ${lost.join(", ")}`) : ok(`all ${tools.length} stack tools are README text too`);
+}
+
+// 5c. Facts. The page may only state what Daniel's own README states: the
+//     numbers below are its dates (and the check's own widths), links go to his
+//     repos or to this repo's files, and the H2s are plain.
+const ALLOWED_NUMBERS = new Set(["2009", "2022", "2024", "2025", "2", "390", "430", "896"]);
+const svgWords = built.map((f) => readFileSync(join(ROOT, "assets", f), "utf8").match(/<title[\s\S]*?<\/desc>/)[0]).join(" ");
+const prose = readme.replaceAll('width="100%"', "");
+const numbers = [...(prose.replace(/https?:\/\/\S+/g, "") + svgWords).matchAll(/\d+/g)].map((m) => m[0]);
+const stray = [...new Set(numbers.filter((n) => !ALLOWED_NUMBERS.has(n)))];
+stray.length ? bad(`numbers not on record: ${stray.join(", ")}`) : ok("every number on the page is on record");
+const banned = ["half of it is notes", "Hi there", "years of experience", "%"].filter((b) => prose.includes(b));
+banned.length ? bad(`banned phrasing: ${banned.join(", ")}`) : ok("no banned phrasing");
+const links = [...readme.matchAll(/\]\(([^)]+)\)|href="([^"]+)"/g)].map((m) => m[1] || m[2]);
+const offsite = links.filter((l) => !/^https:\/\/github\.com\/Danneftw1\/[\w.-]+$/.test(l) && !/^(tools|\.github)\//.test(l));
+offsite.length ? bad(`links outside the allowlist: ${offsite.join(", ")}`) : ok(`${links.length} links, all to Daniel's repos or this repo's files`);
+const h2 = [...readme.matchAll(/^## (.+)$/gm)].map((m) => m[1]).join(", ");
+h2 === "How I build, Stack, Record, Now" ? ok("H2s are the plain four") : bad(`H2s are "${h2}"`);
+const moving = new Set(built.filter((f) => /-static-/.test(f)).map((f) => f.replace(/-static-.*/, "")));
+moving.size <= 2 && pics.length <= 4 ? ok(`${moving.size} moving panels, ${pics.length} pictures`) : bad(`motion budget: ${moving.size} moving panels, ${pics.length} pictures`);
+const nowYear = +((readFileSync(join(ROOT, "assets", built[0]), "utf8").match(/data-now-year="(\d+)"/) || [])[1] || 0);
+if (nowYear && new Date().getFullYear() > nowYear) console.log(`  warn NOW_YEAR is ${nowYear}: "seventeen years" of drums needs a bump in build-assets.py`);
 
 // 6. Draw it. The README's own <picture> blocks, paths rewritten to reach the
 //    assets from tools/out/, on each background, at each width. A stale
@@ -140,6 +182,9 @@ ${body}
     const page = await browser.newPage({ viewport: { width, height: 800 }, deviceScaleFactor: 2, colorScheme: scheme, reducedMotion: motion });
     await page.goto(`file://${framePath}`);
     await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode().catch(() => {}))));
+    // The header counts itself in and wakes on the downbeat at ~1.7 s; photograph
+    // the panel a reader actually looks at, not the first frame of the count-in.
+    await page.waitForTimeout(2000);
     const shot = join(OUT, `${name}-${width}.png`);
     await page.screenshot({ path: shot, fullPage: true });
     // The PNG header says how wide the browser really drew; a headless build
@@ -153,10 +198,45 @@ ${body}
     over > 1 ? bad(`${name} @ ${width}px overflows by ${over}px`) : ok(`${name} @ ${width}px fits, no horizontal scroll`);
     // The picture has to have picked the file this scene is about.
     const picked = await page.evaluate(() => [...document.images].map((i) => i.currentSrc.split("/").pop()));
-    const want = name === "reduced" ? /-static-light\.svg$/ : name === "fallback" ? /^(header|pipeline)-light\.svg$/ : new RegExp(`^(header|pipeline)-${scheme}\\.svg$`);
-    picked.every((p) => want.test(p)) ? null : bad(`${name} @ ${width}px picked ${picked.join(", ")}`);
+    const want = stems.map((stem) => name === "reduced" && hasStatic(stem) ? `${stem}-static-light.svg`
+      : `${stem}-${name === "dark" ? "dark" : "light"}.svg`);
+    picked.join() === want.join() ? null : bad(`${name} @ ${width}px picked ${picked.join(", ")}, wanted ${want.join(", ")}`);
+    // Page budget: the panels together stay about three phone screens.
+    if (width === 390 && name === "light") {
+      const tall = await page.evaluate(() => [...document.images].reduce((s, i) => s + i.getBoundingClientRect().height, 0));
+      tall <= 850 ? ok(`panels total ${Math.round(tall)} CSS px at 390`) : bad(`panels total ${Math.round(tall)} CSS px at 390, over 850`);
+    }
     await page.close();
   }
+}
+// 7. The rest pose. A moving panel with its animations switched off must draw
+//    the same pixels as its -static- twin: that is the promise the reduced-motion
+//    file makes — you see what everyone else sees once the motion settles.
+{
+  const page = await browser.newPage();
+  for (const stem of stems.filter(hasStatic)) {
+    for (const theme of ["light", "dark"]) {
+      const moving = readFileSync(join(ROOT, "assets", `${stem}-${theme}.svg`), "utf8")
+        .replace(/(<svg\b[^>]*>)/, "$1<style>*{animation:none!important}</style>");
+      const still = readFileSync(join(ROOT, "assets", `${stem}-static-${theme}.svg`), "utf8");
+      const diff = await page.evaluate(async ([a, b]) => {
+        const draw = async (src) => {
+          const img = new Image();
+          img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(src);
+          await img.decode();
+          const c = new OffscreenCanvas(716, Math.round(716 * img.naturalHeight / img.naturalWidth));
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          return c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+        };
+        const [x, y] = [await draw(a), await draw(b)];
+        let n = 0;
+        for (let i = 0; i < x.length; i += 4) if (Math.abs(x[i] - y[i]) + Math.abs(x[i + 1] - y[i + 1]) + Math.abs(x[i + 2] - y[i + 2]) > 24) n++;
+        return n / (x.length / 4);
+      }, [moving, still]);
+      diff <= 0.001 ? ok(`${stem}-${theme}: rest pose matches its static file`) : bad(`${stem}-${theme}: rest pose differs from its static file on ${(diff * 100).toFixed(2)}% of pixels`);
+    }
+  }
+  await page.close();
 }
 await browser.close();
 
