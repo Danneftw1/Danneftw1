@@ -1,38 +1,44 @@
 #!/usr/bin/env python3
-"""Draws the profile README's artwork: one made-up piece of studio hardware,
-built in Göteborg, shown as four panels.
+"""Draws the profile README's artwork: a custom mechanical keyboard, in a
+colorway named for Göteborg rain, shown as four panels.
 
-  header    the faceplate: name, role, and a glass display that says the job
-  pipeline  the signal path, printed on the panel: the real LLM architecture
-  stack     every tool as a chip on the stage it serves
-  record    what is current is pulled out of the rack; what ended sits flush
+  header    the board: the name on the alphas, the role on the mods, the day
+            job on the spacebar — held down and lit
+  pipeline  the keymap: the real LLM architecture as keys that press in
+            sequence, three at once where calls run in parallel
+  stack     the kit: every tool as a keycap, coloured by the stage it serves
+  record    the layer: what is current is held and lit; what ended is up
 
-Why a generator instead of hand-written files: each panel exists in two
-finishes (GitHub's light and dark themes) and, where it moves, again without
-motion. The geometry is written once and the palette is a lookup, so the files
-cannot disagree about anything but colour.
+Why a keyboard: Daniel plays two instruments. Drums, for seventeen years, and
+keyboards, which he has built, modded and rotated since 2012. Both are things
+you hit in rhythm, and the second one is the developer's instrument, so the
+CV is drawn as one. The look is the one the hobby is built on: retro keycap
+colours — cream alphas, slate mods — on a modern board with per-key lighting.
 
 The rules the drawing keeps:
 
-  * print never moves, only light moves. Animation is opacity alone, stepped,
-    on a 96 BPM grid; the file's base style is the finished rest pose, so the
-    reduced-motion file is exactly what the animation settles on;
-  * two type families, split by who wrote the text — Lexend Deca for anything
-    a person wrote, IBM Plex Mono for silkscreen and machine text. The 5×7 dot
-    matrix is display technology, drawn as geometry, and only ever behind glass;
-  * one hue per meaning, and never hue alone. Amber is live light and lives only
-    on glass. Coral, cornflower, teal and orchid mark the stage a thing belongs
-    to, always inside an ink keyline and always with its printed name;
-  * the weight of the ink is the certainty: known facts are solid ink, the one
-    approximate fact (drums since ~2009) is dashed pencil, and anything undated
-    is simply not drawn — Quokka is NOW, never a start year;
-  * the phone is the main case: a 390 px phone shows the 1100-unit-wide panel
-    at 358 CSS px, so no text is under 31 units and no mark under 5.
+  * legends are printed; keys move and light moves. Every animation is a key
+    press (a step down and up) or a light (stepped opacity), on a 96 BPM
+    grid. The file's base style is the finished rest pose, so the reduced-
+    motion file is exactly where the animation settles;
+  * one hue per meaning, and never hue alone. Amber light means "now" and is
+    only ever a glow under a key. The four stage hues colour the cap of every
+    tool and every pipeline key, always with the name printed on it. The rain
+    light is ambient and means nothing;
+  * two type families, split by who wrote the text — the legends on the caps
+    are IBM Plex Mono, as a factory prints them; anything printed on the case
+    is Lexend Deca;
+  * the weight of the ink is the certainty: the one approximate fact, drums
+    since ~2009, is dashed pencil. Undated work is held down and lit as NOW,
+    never given a start year;
+  * the phone is the main case: no text under 31 units on an 1100-wide
+    panel, no mark under 5.
 
-Text is converted to outlines. GitHub serves README images under a CSP that
-forbids every external load, so an <img> runs the inline animations but can
-never load a webfont. Each glyph is outlined once per file into <defs> and
-placed with <use>, which keeps the files small.
+Text is converted to outlines, because GitHub serves README images under a
+CSP that forbids every external load. Each glyph is outlined once per file
+into <defs> and placed with <use>. The fonts are committed under
+tools/fonts (SIL OFL), so CI can rebuild the assets and diff them against the
+committed files: a hand-edited SVG fails the build.
 
 Usage: pip install -r tools/requirements.txt
        python3 tools/build-assets.py [--out DIR]
@@ -58,7 +64,7 @@ except ImportError as e:  # pragma: no cover
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-CACHE = HERE / ".fontcache"
+CACHE = HERE / "fonts"  # committed: CI rebuilds the assets and diffs them
 
 # Immutable gstatic URLs (they carry a content hash in the path) plus our own
 # sha256, so a swapped file is caught rather than silently redrawn.
@@ -116,34 +122,6 @@ T_FILL = 4 * S32
 T_TEST = T_FILL + 16 * S32
 T_BOOT = T_TEST + 2 * S32   # 1.71875 s: the downbeat; every loop starts here
 
-# ------------------------------------------------------------------- palette
-
-# Two finishes of one instrument: sage enamel on the light page, pine graphite
-# on the dark one. Glass, lamps and stage caps are physical parts, so they are
-# the same in both files.
-FINISH = {
-    "light": {"plate": "#DDE3D6", "tint": "#CFD7C8", "edge": "#7E897F", "lip": "#65705F",
-              "ink": "#1B211D", "muted": "#4E5A51", "knob": "#1B211D", "pointer": "#DDE3D6"},
-    "dark": {"plate": "#1C2320", "tint": "#26302B", "edge": "#6B786F", "lip": "#080B0A",
-             "ink": "#E9EFE6", "muted": "#A7B3AA", "knob": "#C9D2C6", "pointer": "#1B211D"},
-}
-PARTS = {
-    "glass": "#14120E", "bezel": "#221F19", "ghost": "#2A251D",
-    "amber": "#FFB547",      # live, now — only ever on glass
-    "amber_dim": "#8A6428",  # programmed, not current
-    "model": "#F06A4E",      # the model layer
-    "serve": "#6F95F2",      # services
-    "cloud": "#46C2A8",      # runs on Azure
-    "ship": "#E28AD8",       # ships through
-    "cap_ink": "#1B211D",
-}
-STAGES = ("model", "serve", "cloud", "ship")
-PAGE = {"light": "#ffffff", "dark": "#0d1117"}
-
-
-def tokens(theme: str) -> dict:
-    return {**FINISH[theme], **PARTS, "theme": theme}
-
 
 # ------------------------------------------------------------ palette checks
 
@@ -161,40 +139,6 @@ def contrast(fg: str, bg: str) -> float:
     a, b = lum(fg), lum(bg)
     return round((max(a, b) + 0.05) / (min(a, b) + 0.05), 2)
 
-
-def check_palette() -> None:
-    """Every text role clears 4.5:1 on the surface it is drawn on, every
-    graphic clears 3:1, and every panel edge clears 3:1 against the page it
-    can land on — the light file also lands on the dark page, because the
-    GitHub apps ignore <picture>. Stage caps are exempt against the light
-    plate only because cap() always draws them inside an ink keyline."""
-    fails = []
-
-    def need(what, fg, bg, floor):
-        r = contrast(fg, bg)
-        if r < floor:
-            fails.append(f"{what}: {r}:1 < {floor}:1")
-
-    for theme in FINISH:
-        t = tokens(theme)
-        for role in ("ink", "muted"):
-            for surf in ("plate", "tint"):
-                need(f"{theme} {role} on {surf}", t[role], t[surf], 4.5)
-        need(f"{theme} ink keyline on plate", t["ink"], t["plate"], 3)
-        need(f"{theme} knob on plate", t["knob"], t["plate"], 3)
-        need(f"{theme} pointer on knob", t["pointer"], t["knob"], 3)
-        need(f"{theme} amber on glass", t["amber"], t["glass"], 4.5)
-        need(f"{theme} amber_dim on glass", t["amber_dim"], t["glass"], 3)
-        for s in STAGES:
-            need(f"cap ink on {s}", t["cap_ink"], t[s], 4.5)
-    need("light edge on #ffffff", FINISH["light"]["edge"], PAGE["light"], 3)
-    need("light edge on #0d1117", FINISH["light"]["plate"], PAGE["dark"], 3)
-    need("dark edge on #0d1117", FINISH["dark"]["edge"], PAGE["dark"], 3)
-    need("dark glass ring", FINISH["dark"]["edge"], PARTS["glass"], 3)
-    if lum(PARTS["amber"]) / lum(PARTS["amber_dim"]) < 2.5:
-        fails.append("amber and amber_dim are too close in luminance to read as lit versus dim")
-    if fails:
-        raise SystemExit("palette:\n  " + "\n  ".join(fails))
 
 
 # Machado, Oliveira and Fernandes 2009, severity 1.0, applied in linear RGB.
@@ -214,37 +158,13 @@ def _lab(lin: list[float]) -> tuple[float, float, float]:
     return 116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])
 
 
-def check_cvd() -> None:
-    """Hue is never the only cue, but the stage hues should still separate
-    for a reader with a colour-vision deficiency — Daniel runs a daltonized
-    theme. ΔE76 in Lab after simulation: stages ≥ 15 apart, amber ≥ 12."""
-    fails, worst = [], 999.0
-    for kind, m in CVD.items():
-        def sim(c):
-            v = _lin(c)
-            return _lab([sum(m[i][j] * v[j] for j in range(3)) for i in range(3)])
-
-        def de(a, b):
-            return math.dist(sim(PARTS[a]), sim(PARTS[b]))
-        for i, a in enumerate(STAGES):
-            for b in STAGES[i + 1:]:
-                d = de(a, b)
-                worst = min(worst, d)
-                if d < 15:
-                    fails.append(f"{kind}: {a}/{b} ΔE {d:.1f} < 15")
-            if de("amber", a) < 12:
-                fails.append(f"{kind}: amber/{a} ΔE {de('amber', a):.1f} < 12")
-    if fails:
-        raise SystemExit("colour-vision separation:\n  " + "\n  ".join(fails))
-    print(f"  palette ok; closest stage pair under simulation ΔE {worst:.1f}")
-
 
 # ---------------------------------------------------------------- type as paths
 
 _loaded: dict = {}
 _shaped: dict = {}
 SHORT = {"human-semibold": "hs", "human-light": "hl", "machine-medium": "mm", "machine-semibold": "ms"}
-MIN_TEXT = 31  # viewBox units at 1100 wide: ~10 CSS px on a 390 px phone
+MIN_TEXT = 35  # viewBox units at 1100 wide: an 8 CSS px cap height on a 390 px phone
 
 
 def font_file(name: str) -> Path:
@@ -334,6 +254,35 @@ def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", fit=None):
     return (f'<g fill="{fill}" transform="translate({x + dx:.1f} {y:.1f}) scale({s:.5g} {-s:.5g})">{uses}</g>', w)
 
 
+# The per-file atlas: every glyph is outlined once into <defs>, then placed.
+_atlas: dict[str, str] = {}
+
+
+def _glyph(name: str, gname: str):
+    key = f"{SHORT[name]}{load(name)[0].getGlyphID(gname)}"
+    if key not in _atlas:
+        pen = SVGPathPen(load(name)[0].getGlyphSet(), ntos=lambda v: f"{v:g}")
+        load(name)[0].getGlyphSet()[gname].draw(pen)
+        d = pen.getCommands()
+        _atlas[key] = f'<path id="{key}" d="{d}"/>' if d else ""
+    return key if _atlas[key] else None
+
+
+def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", fit=None):
+    """Outlined text with its baseline at y. Returns (svg, width). `fit` is the
+    width of the field it has to sit in, with 8 units to spare."""
+    assert size >= MIN_TEXT, f"{text!r} set at {size} units, under the {MIN_TEXT}-unit phone floor"
+    run, wfu = shape(name, text, tracking)
+    upem = load(name)[2]
+    s = size / upem
+    w = wfu * s
+    if fit is not None:
+        assert w + 8 <= fit, f"{text!r} is {w:.0f} wide in a {fit:.0f} field — shorten the string, never the size"
+    dx = {"start": 0.0, "middle": -w / 2, "end": -w}[anchor]
+    uses = "".join(f'<use href="#{k}" x="{gx:g}"/>' for g, gx in run if (k := _glyph(name, g)))
+    return (f'<g fill="{fill}" transform="translate({x + dx:.1f} {y:.1f}) scale({s:.5g} {-s:.5g})">{uses}</g>', w)
+
+
 def wrap(name: str, text: str, size: float, width: float, tracking: float = 0.0) -> list[str]:
     """Break `text` into lines no wider than `width`, measured with the shaper."""
     lines, line = [], ""
@@ -351,452 +300,511 @@ def wrap(name: str, text: str, size: float, width: float, tracking: float = 0.0)
     return lines
 
 
-# ------------------------------------------------------- the 5×7 dot matrix
 
-DOT = 6        # pitch; every lit dot sits on the ghost grid (centres ≡ 3 mod 6)
-ADVANCE = 36   # five columns and a gap
-MATRIX = {
-    "A": "01110 10001 10001 11111 10001 10001 10001", "B": "11110 10001 10001 11110 10001 10001 11110",
-    "C": "01110 10001 10000 10000 10000 10001 01110", "D": "11100 10010 10001 10001 10001 10010 11100",
-    "E": "11111 10000 10000 11110 10000 10000 11111", "F": "11111 10000 10000 11110 10000 10000 10000",
-    "G": "01110 10001 10000 10111 10001 10001 01111", "H": "10001 10001 10001 11111 10001 10001 10001",
-    "I": "01110 00100 00100 00100 00100 00100 01110", "J": "00111 00010 00010 00010 00010 10010 01100",
-    "K": "10001 10010 10100 11000 10100 10010 10001", "L": "10000 10000 10000 10000 10000 10000 11111",
-    "M": "10001 11011 10101 10101 10001 10001 10001", "N": "10001 10001 11001 10101 10011 10001 10001",
-    "O": "01110 10001 10001 10001 10001 10001 01110", "P": "11110 10001 10001 11110 10000 10000 10000",
-    "Q": "01110 10001 10001 10001 10101 10010 01101", "R": "11110 10001 10001 11110 10100 10010 10001",
-    "S": "01111 10000 10000 01110 00001 00001 11110", "T": "11111 00100 00100 00100 00100 00100 00100",
-    "U": "10001 10001 10001 10001 10001 10001 01110", "V": "10001 10001 10001 10001 10001 01010 00100",
-    "W": "10001 10001 10001 10101 10101 10101 01010", "X": "10001 10001 01010 00100 01010 10001 10001",
-    "Y": "10001 10001 01010 00100 00100 00100 00100", "Z": "11111 00001 00010 00100 01000 10000 11111",
-    "·": "00000 00000 00000 00100 00000 00000 00000", "-": "00000 00000 00000 11111 00000 00000 00000",
-    "~": "00000 00000 01000 10101 00010 00000 00000", " ": "00000 00000 00000 00000 00000 00000 00000",
+# --------------------------------------------------------------------- facts
+
+NOW_YEAR = 2026
+DRUMS_FROM = 2009      # approximate: drawn as pencil, never as ink
+KEYBOARDS_FROM = 2012  # from Daniel's own notes
+assert NOW_YEAR - DRUMS_FROM == 17, "the page says seventeen years of drums — update the wording"
+
+# --------------------------------------------------------------------- clock
+
+BPM = 96
+BEAT = 60 / BPM          # 0.625 s
+S16 = BEAT / 4           # 0.15625 s
+S32 = BEAT / 8           # 0.078125 s
+BAR = 4 * BEAT           # 2.5 s
+
+
+def secs(t: float) -> str:
+    n = t / S32
+    assert abs(n - round(n)) < 1e-9, f"{t}s is off the 1/32-note grid"
+    return f"{t:.6g}s"
+
+
+def pct(t: float, dur: float) -> str:
+    return f"{100 * t / dur:.4g}%"
+
+
+# ------------------------------------------------------------------- palette
+
+# One set of caps, two cases: steel blue on the light page, navy on the dark
+# one — the colorway is named for Göteborg rain, and the case is the sky. The
+# caps and the lights are the same physical parts in both files, which is
+# also what keeps the light file readable when the GitHub apps put it on a
+# dark page.
+CASE = {
+    "light": {"case": "#456481", "well": "#3A5670", "print": "#EFE9DB", "print_muted": "#D6DFE8",
+              "amber": "#FFB547", "rain": "#A9D4FF"},
+    "dark": {"case": "#1B2E44", "well": "#12202F", "print": "#EFE9DB", "print_muted": "#9FB0C0",
+             "amber": "#FFB547", "rain": "#A9D4FF"},
 }
+CAPS = {  # top face, side, legend
+    "alpha": ("#EFE9DB", "#CBC1AC", "#1F2328"),   # the retro cream alphas
+    "mod": ("#9A9286", "#7B7367", "#1F2328"),     # the retro grey modifiers
+    "model": ("#F06A4E", "#C24E36", "#1F2328"),   # the model layer
+    "serve": ("#6F95F2", "#4C6FC9", "#1F2328"),   # services
+    "cloud": ("#46C2A8", "#2E9880", "#1F2328"),   # runs on Azure
+    "ship": ("#E28AD8", "#B463AA", "#1F2328"),    # ships through
+}
+STAGES = ("model", "serve", "cloud", "ship")
+PAGE = {"light": "#ffffff", "dark": "#0d1117"}
 
 
-def snap(v: float) -> int:
-    """Nearest dot centre on the ghost grid."""
-    return int(round((v - 3) / DOT) * DOT + 3)
+def tokens(theme: str) -> dict:
+    return {**CASE[theme], "theme": theme}
 
 
-def dots(text: str, x: float, y: float, fill: str) -> str:
-    """Dot-matrix text; (x, y) is the centre of the first glyph's top-left dot.
-    A dot is a zero-length round-capped stroke, the smallest way to draw one."""
-    x, y = snap(x), snap(y)
-    out = []
-    for i, ch in enumerate(text):
-        assert ch in MATRIX, f"the dot matrix has no {ch!r} — add it to MATRIX"
-        if ch == " ":
-            continue
-        key = "dm" + str(ord(ch))
-        if key not in _atlas:
-            rows = MATRIX[ch].split()
-            d = "".join(f"M{c * DOT} {r * DOT}h0" for r, row in enumerate(rows) for c, v in enumerate(row) if v == "1")
-            _atlas[key] = f'<path id="{key}" d="{d}"/>'
-        out.append(f'<use href="#{key}" x="{x + i * ADVANCE}" y="{y}"/>')
-    return (f'<g stroke="{fill}" stroke-width="5" stroke-linecap="round" fill="none">'
-            + "".join(out) + "</g>")
+def check_palette() -> None:
+    """Legends clear 4.5:1 on their cap; print clears 4.5:1 on the case;
+    every cap and every glow reads against the case at 3:1 or better (the
+    glow on the silver case is a ring, not a light, and still has to show);
+    the case itself reads against both pages the light file can land on."""
+    fails = []
+
+    def need(what, fg, bg, floor):
+        r = contrast(fg, bg)
+        if r < floor:
+            fails.append(f"{what}: {r}:1 < {floor}:1")
+
+    for name, (top, side, legend) in CAPS.items():
+        need(f"legend on {name}", legend, top, 4.5)
+        need(f"{name} side against its top", side, top, 1.2)
+    for theme, t in CASE.items():
+        for role in ("print", "print_muted"):
+            need(f"{theme} {role} on case", t[role], t["case"], 4.5)
+        for name, (top, side, _) in CAPS.items():
+            need(f"{theme}: {name} cap on case", top, t["case"], 1.4)
+        for light in ("amber", "rain"):
+            need(f"{theme}: {light} glow on case", t[light], t["case"], 2.2)
+    need("light case on #ffffff", CASE["light"]["case"], PAGE["light"], 3)
+    need("light case on #0d1117", CASE["light"]["case"], PAGE["dark"], 2)
+    need("dark case on #0d1117", CASE["dark"]["case"], PAGE["dark"], 1.3)
+    if fails:
+        raise SystemExit("palette:\n  " + "\n  ".join(fails))
 
 
-def dots_width(text: str) -> int:
-    return (len(text) - 1) * ADVANCE + 4 * DOT
+def check_cvd() -> None:
+    """Hue is never the only cue, but the stage hues should still separate
+    for a reader with a colour-vision deficiency — Daniel runs a daltonized
+    theme. ΔE76 in Lab after simulation: stages ≥ 15 apart."""
+    fails, worst = [], 999.0
+    for kind, m in CVD.items():
+        def sim(c):
+            v = _lin(c)
+            return _lab([sum(m[i][j] * v[j] for j in range(3)) for i in range(3)])
+        for i, a in enumerate(STAGES):
+            for b in STAGES[i + 1:]:
+                d = math.dist(sim(CAPS[a][0]), sim(CAPS[b][0]))
+                worst = min(worst, d)
+                if d < 15:
+                    fails.append(f"{kind}: {a}/{b} ΔE {d:.1f} < 15")
+    if fails:
+        raise SystemExit("colour-vision separation:\n  " + "\n  ".join(fails))
+    print(f"  palette ok; closest stage pair under simulation ΔE {worst:.1f}")
 
 
-# ---------------------------------------------------------------- primitives
+# ------------------------------------------------------------------ keycaps
 
-LIP = 12  # the chassis band under a plate: the panel is an object, not a card
-
-
-def plate(t: dict, w: int, h: int) -> list[str]:
-    """The panel: chassis lip, face, edge, four flush screws."""
-    out = [f'<rect x="1.25" y="{1.25 + LIP}" width="{w - 2.5}" height="{h - 2.5}" rx="14" fill="{t["lip"]}"/>',
-           f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="14" fill="{t["plate"]}" '
-           f'stroke="{t["edge"]}" stroke-width="2.5"/>']
-    for cx, cy in ((28, 28), (w - 28, 28), (28, h - 28), (w - 28, h - 28)):
-        out.append(f'<circle cx="{cx}" cy="{cy}" r="11" fill="{t["tint"]}" stroke="{t["edge"]}" stroke-width="2.5"/>'
-                   f'<path d="M{cx - 6} {cy + 6}L{cx + 6} {cy - 6}" stroke="{t["edge"]}" stroke-width="5"/>')
-    return out
+U = 146          # key pitch on the board: a 1u cap is 132 wide with a 14 gap
+GAP = 14
+LOW = 86         # the low-profile keys the keymap uses (cap height)
+PRESS = 10       # how far a top face travels when the key is down
+_keys = 0        # one id per key, for its classes
 
 
-def glass(t: dict, x, y, w, h) -> str:
-    """A display window: the only place light appears. The dark finish rings
-    it, because glass on graphite is barely 1.2:1."""
-    ring = f' stroke="{t["edge"]}" stroke-width="4"' if t["theme"] == "dark" else ""
-    _atlas.setdefault("ghostpat", f'<pattern id="ghost" width="{DOT}" height="{DOT}" patternUnits="userSpaceOnUse">'
-                                  f'<circle cx="3" cy="3" r="2.5" fill="{PARTS["ghost"]}"/></pattern>')
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="{t["glass"]}"{ring}/>'
-            f'<rect x="{x + 6}" y="{y + 6}" width="{w - 12}" height="{h - 12}" rx="6" fill="url(#ghost)"/>')
-
-
-def led(t: dict, cx, cy, cls: str, lit: bool) -> str:
-    op = "" if lit else ' opacity="0"'
-    # r 14 / 8: a lamp has to read on a 390 px phone, where the panel is a third size.
-    return (f'<circle cx="{cx}" cy="{cy}" r="14" fill="{t["bezel"]}"/>'
-            f'<circle cx="{cx}" cy="{cy}" r="8" fill="{t["ghost"]}"/>'
-            f'<circle class="{cls}" cx="{cx}" cy="{cy}" r="8" fill="{t["amber"]}"{op}/>')
-
-
-def cap(t: dict, x, y, w, h, hue: str, text: str | None = None, tx=None, lines=None) -> str:
-    """A stage cap: a stage hue always inside a 5-unit ink keyline, always with
-    its name printed on it — so the hue is never the only thing saying it."""
-    out = [f'<rect x="{x + 2.5}" y="{y + 2.5}" width="{w - 5}" height="{h - 5}" rx="8" '
-           f'fill="{t[hue]}" stroke="{t["ink"]}" stroke-width="5"/>']
-    lines = lines or ([text] if text else [])
-    ch = cap_height("machine-semibold", 31)
-    lead = 38
-    top = y + h / 2 - (ch + lead * (len(lines) - 1)) / 2 + ch
-    for i, ln in enumerate(lines):
-        left = tx if tx is not None else x + 20
-        room = (x + w - 20) - left if tx is None or tx >= x else w - 40
-        out.append(label("machine-semibold", ln, 31, left, top + i * lead, t["cap_ink"], 0.08, fit=room + 8)[0])
+def cap_rect(x, y, w, h, style: str, pressed: bool, cls: str | None, legend=None) -> str:
+    """A keycap seen from above: the side (the full footprint) and the top
+    face, inset more at the bottom because the front slopes toward you. The
+    top face and its legend sit in one group, and that group is what moves
+    when the key is pressed — so a press is a translate of one group, and
+    the side simply shows less of itself."""
+    global _keys
+    top, side, ink = CAPS[style]
+    _keys += 1
+    low = h < 100
+    il, it, ib = (6, 5, 15) if low else (9, 7, 21)
+    rx = 10 if low else 13
+    face_h = h - it - ib
+    tf = f' transform="translate(0 {PRESS})"' if pressed else ""
+    k = f' class="{cls}"' if cls else ""
+    out = [f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{side}"/>',
+           f'<g{k}{tf}><rect x="{x + il}" y="{y + it}" width="{w - 2 * il}" height="{face_h}" rx="{rx - 3}" fill="{top}"/>']
+    if legend:
+        out.append(legend(x + il, y + it, w - 2 * il, face_h, ink))
+    out.append("</g>")
     return "".join(out)
 
 
-def chip(t: dict, x, y, text: str) -> tuple[str, float]:
-    w = measure("human-light", text, 32) + 40
-    ch = cap_height("human-light", 32)
-    return (f'<rect x="{x + 1.5}" y="{y + 1.5}" width="{w - 3:.1f}" height="49" rx="8" fill="{t["tint"]}" '
-            f'stroke="{t["muted"]}" stroke-width="3"/>'
-            + label("human-light", text, 32, x + 20, y + 26 + ch / 2, t["ink"])[0], w)
+def glow(t: dict, x, y, w, h, hue: str, cls: str, lit: bool) -> str:
+    """Light under a key. Three nested rings instead of a blur filter: the
+    same look at a fraction of the paint cost on a phone."""
+    c = t[hue]
+    ops = (0.6, 0.34, 0.16)
+    rings = "".join(
+        f'<rect x="{x - d}" y="{y - d}" width="{w + 2 * d}" height="{h + 2 * d}" rx="{16 + d}" fill="{c}" opacity="{op}"/>'
+        for d, op in zip((6, 14, 24), ops))
+    off = "" if lit else ' opacity="0"'
+    return f'<g class="{cls}"{off}>{rings}</g>'
 
 
-def wire(t: dict, *pts) -> str:
-    d = "M" + "L".join(f"{x} {y}" for x, y in pts)
-    return f'<path d="{d}" stroke="{t["ink"]}" stroke-width="6" stroke-linejoin="round" fill="none"/>'
+def key(t: dict, x, y, w, h, style: str, text: str | None = None, size=31, font="machine-semibold",
+        pressed=False, lit: str | None = None, cls: str | None = None, sub: str | None = None,
+        align="middle") -> str:
+    """A key: optional glow, the cap, a legend (and a sublegend), pressed or
+    not, lit or not. `lit` names the light hue; `cls` tags the moving parts
+    as `{cls}-top` and `{cls}-glow` for the animations."""
+    def legend(fx, fy, fw, fh, ink):
+        out = []
+        if sub:
+            ch = cap_height(font, size)
+            out.append(label(font, text, size, fx + fw / 2 if align == "middle" else fx + 22,
+                             fy + fh / 2 - 8, ink, 0.02, anchor=align, fit=fw - 32)[0])
+            out.append(label("machine-medium", sub, 31, fx + fw / 2 if align == "middle" else fx + 22,
+                             fy + fh / 2 + 34, ink, 0.04, anchor=align, fit=fw - 32)[0])
+        elif text:
+            ch = cap_height(font, size)
+            out.append(label(font, text, size, fx + fw / 2 if align == "middle" else fx + 22,
+                             fy + fh / 2 + ch / 2, ink, 0.02 if size < 50 else 0.0, anchor=align, fit=fw - 8)[0])
+        return "".join(out)
+    parts = []
+    if lit:
+        parts.append(glow(t, x, y, w, h, lit, f"{cls}-glow" if cls else "glow", pressed or lit == "steady"))
+    parts.append(cap_rect(x, y, w, h, style, pressed, f"{cls}-top" if cls else None, legend if (text or sub) else None))
+    return "".join(parts)
 
 
-def style_attr(**props) -> str:
-    return ' style="' + ";".join(f"animation-{k.replace('_', '-')}:{v}" for k, v in props.items()) + '"'
+def case(t: dict, w: int, h: int) -> list[str]:
+    """The case: a rounded plate with a slightly darker well the keys sit in."""
+    return [f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="26" fill="{t["case"]}" '
+            f'stroke="{t["well"]}" stroke-width="2.5"/>']
+
+
+def printed(t: dict, text: str, x, y, anchor="start", muted=True, size=36) -> str:
+    """Silkscreen on the case."""
+    return label("machine-medium", text, size, x, y, t["print_muted" if muted else "print"], 0.08, anchor=anchor)[0]
+
+
+def rng(seed: int):
+    """A tiny deterministic generator, so the rain falls the same way in
+    every build and the light and dark files agree."""
+    s = seed & 0x7FFFFFFF
+    while True:
+        s = (s * 1103515245 + 12345) & 0x7FFFFFFF
+        yield s / 0x7FFFFFFF
 
 
 # -------------------------------------------------------------------- header
 
-HEADER_W, HEADER_H = 1100, 568
-PAGES = (  # knob detent, display line 1, display line 2
-    ("ROLE", "INNOVATION DEVELOPER", "QUOKKA · GOTHENBURG"),
-    ("BUILD", "LLM PIPELINES", "END TO END"),
-    ("DRUMS", "DRUMS", "SEVENTEEN YEARS"),
-)
+HEADER_W, HEADER_H = 1100, 664
+ROLE_KEYS = (("LLM ENGINEERING", 3.0), ("FULL-STACK", 2.25), ("GÖTEBORG", 1.75))
+JOB = "INNOVATION DEVELOPER · QUOKKA"
+
+
+def raindrop(fx, fy, fw, fh, ink):
+    cx, cy = fx + fw / 2, fy + fh / 2 - 2
+    return (f'<path d="M{cx} {cy - 34}C{cx + 5} {cy - 14} {cx + 25} {cy - 3} {cx + 25} {cy + 11}'
+            f'A25 25 0 0 1 {cx - 25} {cy + 11}C{cx - 25} {cy - 3} {cx - 5} {cy - 14} {cx} {cy - 34}Z" fill="{ink}"/>')
 
 
 def header(t: dict, motion: bool = True) -> str:
     _atlas.clear()
-    out = plate(t, HEADER_W, HEADER_H)
+    out = case(t, HEADER_W, HEADER_H)
     add = out.append
+    x0, y0 = 39, 40
+    typed, rained = [], []
 
-    add(label("human-semibold", "Daniel Nilsson", 96, 56, 128, t["ink"], -0.02, fit=780)[0])
-    add(label("human-light", "LLM engineering · full-stack · Göteborg", 40, 58, 186, t["muted"], fit=780)[0])
+    # Rows 1–2: the name on cream alphas, a letter per key, and a raindrop
+    # novelty in the seventh slot of the short row.
+    for r, word in enumerate(("DANIEL", "NILSSON")):
+        for i, ch in enumerate(word):
+            k = f"k{len(typed)}"
+            add(key(t, x0 + i * U, y0 + r * U, U - GAP, U - GAP, "alpha", ch, 90, lit="rain", cls=k))
+            typed.append(k)
+            rained.append(k)
+    x = x0 + 6 * U
+    add(glow(t, x, y0, U - GAP, U - GAP, "rain", "nov-glow", False))
+    add(cap_rect(x, y0, U - GAP, U - GAP, "alpha", False, "nov-top", raindrop))
+    rained.append("nov")
 
-    # The PAGE knob. Its legend is silkscreen; the pointer is drawn inside
-    # each display page, so the knob can never disagree with the display.
-    kx, ky = 1000, 104
-    detents = []
-    for i, (name, _, _) in enumerate(PAGES):
-        base = 70 + 38 * i
-        add(label("machine-medium", name, 31, 940, base, t["muted"], 0.08, anchor="end")[0])
-        mid = base - cap_height("machine-medium", 31) / 2
-        add(f'<path d="M948 {mid:.1f}H958" stroke="{t["muted"]}" stroke-width="5"/>')
-        detents.append(math.atan2(mid - ky, 952 - kx))
-    add(f'<circle cx="{kx}" cy="{ky}" r="38" fill="{t["knob"]}" stroke="{t["edge"]}" stroke-width="2.5"/>')
+    # Row 3: the role on slate mods.
+    x, y = x0, y0 + 2 * U
+    for text, units in ROLE_KEYS:
+        w = round(units * U - GAP)
+        k = f"m{len(rained)}"
+        add(key(t, x, y, w, U - GAP, "mod", text, 42, lit="rain", cls=k))
+        rained.append(k)
+        x += round(units * U)
+    assert abs((x - x0) - 7 * U) < 2, "the role row does not span the board"
 
-    def pointer(a):
-        x1, y1 = kx + 10 * math.cos(a), ky + 10 * math.sin(a)
-        x2, y2 = kx + 30 * math.cos(a), ky + 30 * math.sin(a)
-        return (f'<path d="M{x1:.1f} {y1:.1f}L{x2:.1f} {y2:.1f}" stroke="{t["pointer"]}" '
-                f'stroke-width="6" stroke-linecap="round"/>')
+    # Row 4: the day job is the spacebar — the key you hit most — held down
+    # and lit, with a NOW key beside it in the same state.
+    y = y0 + 3 * U
+    add(key(t, x0, y, round(6 * U - GAP), U - GAP, "alpha", JOB, 46, pressed=True, lit="amber", cls="job"))
+    add(key(t, x0 + 6 * U, y, U - GAP, U - GAP, "alpha", "NOW", 40, pressed=True, lit="amber", cls="now"))
 
-    add(glass(t, 56, 222, 988, 170))
-    boot = []
-    for i, (name, l1, l2) in enumerate(PAGES):
-        for ln in (l1, l2):
-            assert len(ln) <= 20, f"{ln!r} is longer than the display's 20 characters"
-        op = "" if i == 0 else ' opacity="0"'
-        boot.append(f'<g class="pg pg{i}"{op}>{dots(l1, 87, 255, t["amber"])}{dots(l2, 87, 321, t["amber"])}'
-                    f'{pointer(detents[i])}</g>')
-    # NOW: steady, never blinks.
-    boot.append(f'<rect x="882" y="264" width="18" height="18" fill="{t["amber"]}"/>' + dots("NOW", 915, 255, t["amber"]))
-
-    # The bar window: sixteen programmed steps and a cursor that walks them.
-    add(glass(t, 56, 420, 988, 56))
-    cells = [80 + g * 242 + k * 56 for g in range(4) for k in range(4)]
-    for i, x in enumerate(cells):
-        add(f'<rect class="off" x="{x}" y="440" width="44" height="16" fill="{t["amber_dim"]}"'
-            f'{style_attr(duration=secs(T_FILL + i * S32))}/>')
-    for i, x in enumerate(cells):
-        op = "" if i == 0 else ' opacity="0"'
-        boot.append(f'<rect class="cur" x="{x}" y="440" width="44" height="16" fill="{t["amber"]}"{op}'
-                    f'{style_attr(delay=secs(T_BOOT + i * S16))}/>')
-    add(f'<g class="boot">{"".join(boot)}</g>')
-    # The segment test: one sixteenth where every dot lights, on the downbeat.
-    _atlas.setdefault("litpat", f'<pattern id="lit" width="{DOT}" height="{DOT}" patternUnits="userSpaceOnUse">'
-                                f'<circle cx="3" cy="3" r="2.5" fill="{PARTS["amber"]}"/></pattern>')
-    add('<rect class="test" x="62" y="228" width="976" height="158" rx="6" fill="url(#lit)" opacity="0"/>')
-
-    add(label("machine-medium", "TILLVERKAD I GÖTEBORG", 31, 1044, 528, t["muted"], 0.08, anchor="end")[0])
-
-    cycle = 8 * BAR
-    css = f"""
-    .boot{{animation:hide {secs(T_BOOT)} steps(1,end)}}
-    .off{{animation-name:hide;animation-timing-function:steps(1,end)}}
-    @keyframes hide{{0%,100%{{opacity:0}}}}
-    .test{{animation:test {secs(T_BOOT)} steps(1,end)}}
-    @keyframes test{{0%{{opacity:0}}{pct(T_TEST, T_BOOT)},100%{{opacity:1}}}}
-    .pg{{animation:{secs(cycle)} steps(1,end) {secs(T_BOOT)} infinite}}
-    .pg0{{animation-name:p0}}.pg1{{animation-name:p1}}.pg2{{animation-name:p2}}
-    @keyframes p0{{0%{{opacity:1}}50%,100%{{opacity:0}}}}
-    @keyframes p1{{0%{{opacity:0}}50%{{opacity:1}}75%,100%{{opacity:0}}}}
-    @keyframes p2{{0%{{opacity:0}}75%,100%{{opacity:1}}}}
-    .cur{{animation:cur {secs(BAR)} steps(1,end) infinite}}
-    @keyframes cur{{0%{{opacity:1}}{pct(S16, BAR)},100%{{opacity:0}}}}
-    """
-    return svg(HEADER_W, HEADER_H + LIP, "Daniel Nilsson — LLM engineering, full-stack, Göteborg",
-               ALT["header"], css if motion else "", out)
+    # Motion. The cold open types the name at sixteenths — each key steps down
+    # for a thirty-second and lights as it goes — and the spacebar lands on
+    # the next downbeat. From then on it rains: every key catches two drops of
+    # light in each four-bar cycle, where the generator decided once.
+    boot = 16 * S16
+    css = [
+        "@keyframes tap{0%{transform:translateY(10px)}50%,100%{transform:translateY(0)}}",
+        "@keyframes flash{0%{opacity:1}50%,100%{opacity:0}}",
+        "@keyframes hold{0%,100%{transform:translateY(0)}}",
+        "@keyframes hide{0%,100%{opacity:0}}",
+        f"@keyframes rain{{0%{{opacity:1}}{pct(S32, 4 * BAR)},100%{{opacity:0}}}}",
+        f"@keyframes rain2{{0%,{pct(2 * BAR, 4 * BAR)}{{opacity:0}}{pct(2 * BAR + S32, 4 * BAR)}{{opacity:1}}{pct(2 * BAR + 2 * S32, 4 * BAR)},100%{{opacity:0}}}}",
+    ]
+    r = rng(2009)
+    rules, busy = [], set()
+    for k in rained:
+        o1 = round(next(r) * 2 * BAR / S32) * S32
+        o2 = round(next(r) * 2 * BAR / S32) * S32
+        busy.update({round(o1 / S32), round((2 * BAR + o2) / S32)})
+        anims = [f"rain {secs(4 * BAR)} steps(1,end) {secs(boot + o1)} infinite",
+                 f"rain2 {secs(4 * BAR)} steps(1,end) {secs(boot + o2)} infinite"]
+        if k in typed:
+            d = secs(typed.index(k) * S16)
+            rules.append(f".{k}-top{{animation:tap {secs(S16)} steps(1,end) {d} 1}}")
+            anims.insert(0, f"flash {secs(S16)} steps(1,end) {d} 1")
+        rules.append(f".{k}-glow{{animation:{','.join(anims)}}}")
+    for k in ("job", "now"):
+        rules.append(f".{k}-top{{animation:hold {secs(boot)} steps(1,end) 1}}")
+        rules.append(f".{k}-glow{{animation:hide {secs(boot)} steps(1,end) 1}}")
+    # A moment in the cycle when no drop is lit: there the moving file is
+    # exactly the still, and the check holds it to that.
+    quiet = next(s for s in range(4, round(4 * BAR / S32)) if not busy & {s - 1, s, s + 1})
+    still_at = boot + 4 * BAR + quiet * S32 + S32 / 2
+    return svg(HEADER_W, HEADER_H, "Daniel Nilsson — LLM engineering, full-stack, Göteborg",
+               ALT["header"], "".join(css + rules) if motion else "", out, still_at)
 
 
 # ------------------------------------------------------------------ pipeline
 
-PIPE_W, PIPE_H = 1100, 628
+PIPE_W, PIPE_H = 1100, 720
 LOOP = 96  # sixteenths: six bars, fifteen seconds
+LEG = 44   # legend size on the keymap: ~14 CSS px on a 390 px phone
 
-# When each lamp is lit, in sixteenths [start, end). Pass A is a call whose
-# third model answer fails the filter and is retried; pass B is clean and
-# ends with the traces sending the change back to the prompt.
-STEPS = {
-    "req": [(0, 2), (48, 50)],
-    "p1": [(2, 4), (50, 52), (90, 96)], "p2": [(4, 6), (52, 54)], "p3": [(6, 8), (54, 56)],
-    "fo": [(8, 10), (56, 58)],
-    "mA": [(10, 16), (58, 64)], "mB": [(10, 16), (58, 64)], "mC": [(10, 16), (26, 30), (58, 64)],
-    "fi": [(16, 18), (30, 32), (64, 66)],
-    "flt": [(18, 22), (32, 34), (66, 68)],
-    "rty": [(22, 26)],
-    "dn": [(34, 36), (68, 70)],
-    "out": [(36, 40), (70, 74)],
-    "srv": [(40, 44), (74, 78)],
-    "trc": [(42, 48), (76, 82)],
-    "it1": [(82, 86)], "it2": [(86, 90)],
+# The keymap's timeline, in sixteenths. A request is a pulse of light that
+# travels the traces; a key goes down while its stage runs. Pass A (0–47) is
+# a call whose third model answer fails the filter and is sent back; pass B
+# (48–95) is clean, and its traces send the change back to the prompt.
+TRAVEL = {   # trace: [(start, end)] — the pulse is on that trace between them
+    "in":  [(0, 2), (48, 50)],
+    "po":  [(8, 10), (56, 58)],
+    "fa":  [(10, 11), (58, 59)], "fb": [(10, 11), (58, 59)], "fc": [(10, 11), (58, 59)],
+    "ia":  [(17, 18), (65, 66)], "ib": [(17, 18), (65, 66)], "ic": [(17, 18), (30, 31), (65, 66)],
+    "mf":  [(18, 19), (31, 32), (66, 67)],
+    "rt":  [(22, 26)],
+    "fo":  [(34, 37), (70, 73)],
+    "os":  [(40, 41), (76, 77)],
+    "st":  [(44, 45), (80, 81)],
+    "it":  [(84, 88)],
 }
-REST = {"fo", "mA", "mB", "mC"}  # the still: a call fanned out to three models
+DOWN = {     # key: [(start, end)] — the key is held down
+    "prompt": [(2, 8), (50, 56), (88, 94)],
+    "mA": [(11, 17), (59, 65)], "mB": [(11, 17), (59, 65)], "mC": [(11, 17), (26, 30), (59, 65)],
+    "filter": [(19, 22), (32, 34), (67, 70)],
+    "retry": [(22, 26)],
+    "output": [(37, 40), (73, 76)],
+    "serve": [(41, 44), (77, 80)],
+    "traces": [(45, 48), (81, 84)],
+}
+REST = {"mA", "mB", "mC"}  # the still: a call fanned out to three models, all down at once
 
 
-def keyframes(name: str, spans: list[tuple[int, int]]) -> str:
+def key_css(name: str, spans) -> str:
     on = [False] * LOOP
     for a, b in spans:
-        assert 0 <= a < b <= LOOP and b - a >= 1, f"{name}: bad span {a}-{b}"
+        assert 0 <= a < b <= LOOP, f"{name}: bad span {a}-{b}"
         for s in range(a, b):
             on[s] = True
-    frames, prev = [], None
+    ft, fo, prev = [], [], None
     for s in range(LOOP):
         if on[s] != prev:
-            frames.append(f"{100 * s / LOOP:.4g}%{{opacity:{1 if on[s] else 0}}}")
+            p = f"{100 * s / LOOP:.4g}%"
+            ft.append(f"{p}{{transform:translateY({PRESS if on[s] else 0}px)}}")
+            fo.append(f"{p}{{opacity:{1 if on[s] else 0}}}")
             prev = on[s]
-    frames.append(f"100%{{opacity:{1 if on[-1] else 0}}}")
-    return f"@keyframes k{name}{{{''.join(frames)}}}.L-{name}{{animation-name:k{name}}}"
+    ft.append(f"100%{{transform:translateY({PRESS if on[-1] else 0}px)}}")
+    fo.append(f"100%{{opacity:{1 if on[-1] else 0}}}")
+    return (f"@keyframes t{name}{{{''.join(ft)}}}@keyframes o{name}{{{''.join(fo)}}}"
+            f".{name}-top{{animation-name:t{name}}}.{name}-glow{{animation-name:o{name}}}")
+
+
+def path_len(pts) -> float:
+    return sum(math.dist(a, b) for a, b in zip(pts, pts[1:]))
+
+
+PULSE = 46  # the length of a pulse of light on a trace
+
+
+def pulse_css(name: str, spans, length: float) -> str:
+    """A pulse is a dash of light on a copy of the trace. Its dash pattern is
+    [pulse, trace + 100], so at most one dash is ever near the path and, parked
+    just before the start, the next one lies well past the end; the offset
+    walks it from before the start to past the end, linearly, inside each
+    travel window."""
+    # Parked, the dash sits a cap's width before the start (a round cap on a
+    # dash ending at 0 would still draw half a dot); spent, a cap past the end.
+    p, off = PULSE + 12, -(length + 12)
+    fr = [f"0%{{stroke-dashoffset:{p}}}"]
+    for a, b in spans:
+        assert 0 <= a < b <= LOOP, f"{name}: bad span {a}-{b}"
+        fr.append(f"{100 * a / LOOP:.4g}%{{stroke-dashoffset:{p}}}")
+        fr.append(f"{100 * b / LOOP:.4g}%{{stroke-dashoffset:{off:.0f}}}")
+        if b < LOOP:
+            fr.append(f"{100 * b / LOOP + 0.001:.5g}%{{stroke-dashoffset:{p}}}")
+    fr.append(f"100%{{stroke-dashoffset:{p}}}")
+    return f"@keyframes d{name}{{{''.join(fr)}}}.p-{name}{{animation-name:d{name}}}"
 
 
 def pipeline(t: dict, motion: bool = True) -> str:
     _atlas.clear()
-    out = plate(t, PIPE_W, PIPE_H)
+    out = case(t, PIPE_W, PIPE_H)
     add = out.append
-    boxes: list[tuple[str, float, float, float, float]] = []
+    H = LOW
+    boxes, traces = [], {}
 
-    def text(s, x, y, anchor="start"):
-        svg_, w = label("machine-medium", s, 31, x, y, t["muted"], 0.08, anchor=anchor)
+    def node(name, x, y, w, style, text):
+        boxes.append((name, x, y, x + w, y + H))
+        add(key(t, x, y, w, H, style, text, LEG, pressed=name in REST, lit="amber", cls=name))
+
+    def note(s, x, y, anchor="start"):
+        svg_, w = label("machine-medium", s, 36, x, y, t["print_muted"], 0.08, anchor=anchor)
         x0 = {"start": x, "middle": x - w / 2, "end": x - w}[anchor]
-        boxes.append((s, x0, y - cap_height("machine-medium", 31), x0 + w, y))
+        boxes.append((s, x0, y - cap_height("machine-medium", 36), x0 + w, y))
         add(svg_)
 
-    def box(nm, x, y, w, h):
-        boxes.append((nm, x, y, x + w, y + h))
+    def trace(name, *pts):
+        traces[name] = pts
+        d = "M" + "L".join(f"{x} {y}" for x, y in pts)
+        add(f'<path d="{d}" stroke="{t["print_muted"]}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" fill="none"/>')
 
-    # Wires first, so every cap and lamp sits on top of them.
-    add(wire(t, (118, 170), (170, 170)))                                  # request -> prompt
-    add(wire(t, (400, 170), (470, 170)))                                  # prompt -> split
-    add(wire(t, (470, 110), (470, 230)))
-    for y in (110, 170, 230):
-        add(wire(t, (470, y), (520, y)))                                  # fan-out
-        add(wire(t, (690, y), (740, y)))                                  # fan-in
-    add(wire(t, (740, 110), (740, 230)))
-    add(wire(t, (740, 170), (800, 170)))                                  # -> filter
-    add(wire(t, (900, 210), (900, 262), (605, 262), (605, 252)))          # retry, back into model C
-    add(wire(t, (1000, 210), (1000, 400)))                                # -> structured output
-    add(wire(t, (790, 440), (700, 440)))                                  # -> serve
-    add(wire(t, (520, 440), (470, 440)))                                  # -> traces
-    add(wire(t, (250, 410), (250, 210)))                                  # iterate, back to the prompt
-    for x, y0, y1 in ((300, 470, 520), (610, 470, 520), (917, 496, 520)):
-        add(wire(t, (x, y0), (x, y1)))                                    # mounted on the band below
+    # Geometry: two rows of keys and two bands. Widths come from the legends.
+    def kw(text):
+        return round(measure("machine-semibold", text, LEG, 0.02)) + 44
+    yA, yB = 218, 516          # the centre lines of the two rows
+    xs = 56
+    w_prompt, w_model, w_filter = kw("PROMPT"), kw("MODEL"), kw("FILTER")
+    x_prompt = 176
+    x_split = x_prompt + w_prompt + 64
+    x_model = x_split + 40
+    x_merge = x_model + w_model + 40
+    x_filter = x_merge + 64
+    assert x_filter + w_filter <= 1044, "the top row overruns the case"
+    ys = (yA - H - 12, yA, yA + H + 12)   # the three model calls
+    w_out, w_serve, w_traces = kw("OUTPUT"), kw("SERVE"), kw("TRACES")
+    # The bottom row: TRACES starts under PROMPT (the iterate trace rises
+    # straight between them), OUTPUT ends under FILTER, SERVE sits between.
+    x_traces = x_prompt + 24
+    x_out = 1044 - w_out
+    x_serve = round((x_traces + w_traces + x_out) / 2 - w_serve / 2)
+    assert x_serve - (x_traces + w_traces) >= 40 and x_out - (x_serve + w_serve) >= 40, "the bottom row is too tight"
+    x_it = x_prompt + w_prompt // 2                   # up the middle of PROMPT
+    assert x_traces + 24 <= x_it <= x_traces + w_traces - 24, "the iterate trace misses TRACES"
+    x_down = x_filter + w_filter - 40                 # down from FILTER into OUTPUT
+    assert x_out + 24 <= x_down <= x_out + w_out - 24, "the down trace misses OUTPUT"
 
-    # The input jack.
-    add(f'<circle cx="96" cy="170" r="22" fill="{t["tint"]}" stroke="{t["ink"]}" stroke-width="6"/>'
-        f'<circle cx="96" cy="170" r="9" fill="{t["glass"]}"/>')
-    box("jack", 74, 148, 44, 44)
-    text("REQUEST", 56, 238)
+    # Traces first, keys on top.
+    trace("in", (116, yA), (x_prompt, yA))
+    trace("po", (x_prompt + w_prompt, yA), (x_split, yA))
+    for nm, y in zip("abc", ys):
+        trace(f"f{nm}", (x_split, yA), (x_split, y), (x_model, y))
+        trace(f"i{nm}", (x_model + w_model, y), (x_merge, y), (x_merge, yA))
+    trace("mf", (x_merge, yA), (x_filter, yA))
+    y_rt = ys[2] + H + 14   # the retry key clears model C by a key gap
+    trace("rt", (x_filter + w_filter / 2, yA + H / 2), (x_filter + w_filter / 2, y_rt), (x_model + w_model / 2, y_rt), (x_model + w_model / 2, ys[2] + H / 2))
+    trace("fo", (x_down, yA + H / 2), (x_down, yB - H / 2))
+    trace("os", (x_out, yB), (x_serve + w_serve, yB))
+    trace("st", (x_serve, yB), (x_traces + w_traces, yB))
+    trace("it", (x_it, yB - H / 2), (x_it, yA + H / 2))
+    for x in (x_traces + w_traces / 2, x_out + w_out / 2):
+        add(f'<path d="M{x} {yB + H / 2}V{PIPE_H - 130}" stroke="{t["print_muted"]}" stroke-width="7" stroke-linecap="round"/>')
 
-    add(cap(t, 170, 130, 230, 80, "model"))
-    box("PROMPT cap", 170, 130, 230, 80)
-    text("PROMPT", 170, 112)
-    add(f'<path d="M215 170H355" stroke="{t["cap_ink"]}" stroke-width="6"/>')
-    text("FAN-OUT", 470, 70, "middle")
-    for i, y in enumerate((88, 148, 208)):
-        add(cap(t, 520, y, 170, 44, "model", "MODEL"))
-        box(f"model {i}", 520, y, 170, 44)
-    text("FAN-IN", 740, 70, "middle")
-    add(cap(t, 800, 130, 244, 80, "model", "FILTER"))
-    box("FILTER", 800, 130, 244, 80)
-    text("RETRY", 760, 306, "middle")
-    add(cap(t, 790, 400, 254, 96, "serve", lines=["STRUCTURED", "OUTPUT"]))
-    box("OUTPUT", 790, 400, 254, 96)
-    add(cap(t, 520, 410, 180, 60, "serve", "SERVE"))
-    box("SERVE", 520, 410, 180, 60)
-    add(cap(t, 130, 410, 340, 60, "model", "TRACES · EVALS"))
-    box("TRACES", 130, 410, 340, 60)
-    text("ITERATE", 272, 330)
-    add(cap(t, 56, 520, 584, 64, "cloud", "AZURE · INFRA AS CODE"))
-    box("CLOUD", 56, 520, 584, 64)
-    add(cap(t, 656, 520, 388, 64, "ship", "DEPLOY PIPELINE"))
-    box("SHIP", 656, 520, 388, 64)
+    # The pulses: one amber dash per trace, hidden until its window.
+    for nm, pts in traces.items():
+        d = "M" + "L".join(f"{x} {y}" for x, y in pts)
+        # The dash pattern is an attribute, not CSS: the still has no CSS, and
+        # a pulse with no pattern would be a solid amber line over every trace.
+        add(f'<path class="p p-{nm}" d="{d}" stroke="{t["amber"]}" stroke-width="10" stroke-linecap="round" '
+            f'stroke-linejoin="round" fill="none" stroke-dasharray="{PULSE} {path_len(pts) + 100:.0f}" stroke-dashoffset="{PULSE + 12}"/>')
 
-    lamps = {"req": (144, 170), "p1": (215, 170), "p2": (285, 170), "p3": (355, 170), "fo": (435, 170),
-             "mA": (664, 110), "mB": (664, 170), "mC": (664, 230), "fi": (770, 170), "flt": (1014, 170),
-             "rty": (760, 262), "dn": (1000, 330), "out": (745, 440), "srv": (674, 440), "trc": (495, 440),
-             "it1": (250, 350), "it2": (250, 290)}
-    assert set(lamps) == set(STEPS), "every lamp needs a step row, and every row a lamp"
-    for nm, (cx, cy) in lamps.items():
-        add(led(t, cx, cy, f"L L-{nm}", nm in REST))
+    # The request comes in through the port on the left edge of the case.
+    add(f'<rect x="54" y="{yA - 24}" width="62" height="48" rx="16" fill="{t["well"]}" stroke="{t["print_muted"]}" stroke-width="4"/>'
+        f'<rect x="66" y="{yA - 10}" width="38" height="20" rx="10" fill="{t["print_muted"]}"/>')
+    boxes.append(("port", 54, yA - 24, 116, yA + 24))
+    note("REQUEST", 56, yA - 52)
+    note("FAN-OUT", x_split, ys[0] - H / 2 - 22, "middle")
+    note("FAN-IN", x_merge, ys[0] - H / 2 - 22, "middle")
+    note("ITERATE", x_it + 24, (yA + yB) / 2 + 12)
 
-    # Nothing printed may overlap anything else printed.
+    node("prompt", x_prompt, yA - H / 2, w_prompt, "model", "PROMPT")
+    for nm, y in zip("ABC", ys):
+        node(f"m{nm}", x_model, y - H / 2, w_model, "model", "MODEL")
+    node("filter", x_filter, yA - H / 2, w_filter, "model", "FILTER")
+    node("output", x_out, yB - H / 2, w_out, "serve", "OUTPUT")
+    node("serve", x_serve, yB - H / 2, w_serve, "serve", "SERVE")
+    node("traces", x_traces, yB - H / 2, w_traces, "model", "TRACES")
+    # The retry key sits on its own return trace, below model C.
+    w_retry = kw("RETRY")
+    node("retry", x_filter - 40 - w_retry, y_rt - H / 2, w_retry, "model", "RETRY")
+
+    # The two bands underneath: what it all runs on, and how it ships.
+    yb = PIPE_H - 130
+    half = (1044 - 56 - GAP) // 2
+    add(key(t, 56, yb, half, H, "cloud", "RUNS ON AZURE", LEG))
+    add(key(t, 56 + half + GAP, yb, half, H, "ship", "DEPLOY PIPELINE", LEG))
+
     for i, a in enumerate(boxes):
         for b in boxes[i + 1:]:
             if a[1] < b[3] and b[1] < a[3] and a[2] < b[4] and b[2] < a[4]:
                 raise SystemExit(f"pipeline: {a[0]!r} overlaps {b[0]!r}")
 
-    css = (f".L{{animation:{secs(LOOP * S16)} steps(1,end) {secs(T_BOOT)} infinite}}"
-           + "".join(keyframes(nm, spans) for nm, spans in STEPS.items()))
-    return svg(PIPE_W, PIPE_H + LIP, "How a request moves through the pipelines I build",
-               ALT["pipeline"], css if motion else "", out)
-
-
-# --------------------------------------------------------------------- stack
-
-STACK_W, STACK_H = 1100, 628
-STACK = (
-    ("model", "MODEL", ("Azure OpenAI", "AI Foundry", "MCP servers", "Langfuse")),
-    ("serve", "SERVE", ("TypeScript", "Python · Flask", "React + Vite", "Express", "pnpm monorepo")),
-    ("cloud", "CLOUD", ("App Service", "Cosmos DB", "Key Vault", "Entra External ID (B2C)", "Bicep")),
-    ("ship", "SHIP", ("GitHub Actions", "Claude Code · Cursor", "AI-assisted code review", "PR automation")),
-)
-
-
-def stack(t: dict, motion: bool = False) -> str:
-    _atlas.clear()
-    out = plate(t, STACK_W, STACK_H)
-    for r, (hue, name, tools) in enumerate(STACK):
-        y0 = 48 + 144 * r
-        out.append(cap(t, 56, y0, 144, 52, hue, name))
-        x, y, lines = 224, y0, 1
-        for tool in tools:
-            w = measure("human-light", tool, 32) + 40
-            if x + w > 1044:
-                x, y, lines = 224, y + 64, lines + 1
-            assert lines <= 2, f"{name}: the chips need a third line"
-            svg_, w = chip(t, x, y, tool)
-            out.append(svg_)
-            x += w + 14
-    return svg(STACK_W, STACK_H + LIP, "Stack, grouped by where each tool acts", ALT["stack"], "", out)
-
-
-# -------------------------------------------------------------------- record
-
-REC_W, REC_H = 1100, 636
-RECORD = (  # pulled out (current), title, subtitle, years
-    (True, "Innovation developer · Quokka", "AI-POWERED PRODUCTS, END TO END", None),
-    (True, "Side projects", "HOBBY, MOSTLY PRIVATE", None),
-    (True, "Drums · seventeen years", f"PLAYING, RECORDING · SINCE ~{DRUMS_FROM}", None),
-    (False, "Some C", "PUBLIC REPO", "2025"),
-    (False, "IT-högskolan", "AI AND ML COURSEWORK", "2022–2024"),
-)
-
-
-def record(t: dict, motion: bool = False) -> str:
-    _atlas.clear()
-    out = plate(t, REC_W, REC_H)
-    add = out.append
-    add(f'<rect x="40" y="40" width="1020" height="560" rx="8" fill="{t["tint"]}"/>')
-    for x in (40, 1044):
-        add(f'<rect x="{x}" y="40" width="16" height="560" fill="{t["muted"]}"/>')
-        for k in range(5):
-            add(f'<rect x="{x + 4}" y="{76 + 110 * k}" width="8" height="24" rx="4" fill="{t["tint"]}"/>')
-    for i, (pulled, title, sub, years) in enumerate(RECORD):
-        y0 = 56 + 110 * i
-        x0 = 96 if pulled else 56
-        if pulled:
-            add(f'<rect x="{x0}" y="{y0 + LIP}" width="948" height="96" rx="6" fill="{t["lip"]}"/>')
-        add(f'<rect x="{x0 + 1.25}" y="{y0 + 1.25}" width="945.5" height="93.5" rx="6" fill="{t["plate"]}" '
-            f'stroke="{t["edge"]}" stroke-width="2.5"/>')
-        add(label("human-semibold", title, 40, x0 + 32, y0 + 44, t["ink"], fit=698)[0])
-        add(label("machine-medium", sub, 31, x0 + 32, y0 + 80, t["muted"], 0.04, fit=698)[0])
-        if "~" in sub:  # the one approximate fact is pencil: dashed, never solid ink
-            pre = sub[:sub.index("~")]
-            a = x0 + 32 + measure("machine-medium", pre, 31, 0.04)
-            b = x0 + 32 + measure("machine-medium", sub, 31, 0.04)
-            add(f'<path d="M{a:.1f} {y0 + 89}H{b:.1f}" stroke="{t["muted"]}" stroke-width="5" stroke-dasharray="12 8"/>')
-        if pulled:
-            add(glass(t, x0 + 746, y0 + 20, 170, 56))
-            add(f'<rect x="{x0 + 766}" y="{y0 + 39}" width="18" height="18" fill="{t["amber"]}"/>')
-            add(dots("NOW", x0 + 800, y0 + 30, t["amber"]))
-        else:
-            add(label("machine-medium", years, 34, x0 + 916, y0 + 58, t["ink"], 0.04, anchor="end")[0])
-    return svg(REC_W, REC_H + LIP, "Record: what is current, and what ended when", ALT["record"], "", out)
+    delay = secs(16 * S16)
+    css = (f".p{{animation-duration:{secs(LOOP * S16)};animation-timing-function:linear;animation-delay:{delay};animation-iteration-count:infinite}}"
+           + "".join(f".{n}-top,.{n}-glow{{animation-duration:{secs(LOOP * S16)};animation-timing-function:steps(1,end);animation-delay:{delay};animation-iteration-count:infinite}}" for n in DOWN)
+           + "".join(key_css(nm, spans) for nm, spans in DOWN.items())
+           + "".join(pulse_css(nm, spans, path_len(traces[nm])) for nm, spans in TRAVEL.items()))
+    still_at = 16 * S16 + 13 * S16   # the chord: the three model keys down, nothing else moving
+    return svg(PIPE_W, PIPE_H, "How a request moves through the pipelines I build",
+               ALT["pipeline"], css if motion else "", out, still_at)
 
 
 # ---------------------------------------------------------------- alt text
 
-# Each file's <desc> and the README's alt text are the same string; the check
-# holds them equal, so a reader who cannot see the panel gets every fact on it.
 ALT = {
-    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. A studio-hardware faceplate whose "
-               "amber display reads INNOVATION DEVELOPER, QUOKKA · GOTHENBURG, with the NOW lamp lit."),
+    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. A custom mechanical keyboard in cream "
+               "and slate on a rain-blue case: the name on the letter keys, the role on the modifiers, and the "
+               "spacebar held down and lit, reading INNOVATION DEVELOPER · QUOKKA, beside a lit NOW key."),
     "pipeline": ("How a request moves: it enters a multi-stage prompt, fans out to three parallel model calls "
                  "and fans back in, passes a content filter that can send one call back to retry, becomes "
                  "structured output, is served, and is traced and evaluated before the prompt is iterated. "
                  "It runs on Azure, written as code, and ships through a deploy pipeline."),
-    "stack": "Stack, grouped by where each tool acts. " + " ".join(
-        f"{name.title()}: {' · '.join(tools)}." for _, name, tools in STACK),
-    "record": ("Record. Current, pulled out: innovation developer at Quokka; side projects, mostly private; "
-               f"drums, seventeen years, since about {DRUMS_FROM}. Ended: some C, 2025; IT-högskolan, AI and ML "
-               "coursework, 2022–2024."),
 }
 
 
 # --------------------------------------------------------------------- frame
 
-def svg(w: int, h: int, title: str, desc: str, css: str, body: list[str]) -> str:
-    """The frame. An empty `css` means a still: no <style>, and every
-    per-element animation property goes too, so nothing in the file moves —
-    what is left is the base style, which is the rest pose."""
+def svg(w: int, h: int, title: str, desc: str, css: str, body: list[str], still_at: float) -> str:
+    """The frame. An empty `css` means a still: no <style> at all, so what is
+    left is the base style — the rest pose. `still_at` is a time, in seconds
+    from load, at which the moving file shows exactly that pose; the check
+    seeks to it and compares."""
     inner = "\n".join(body)
-    style = ""
-    if css.strip():
-        style = "<style>" + re.sub(r"\s+", " ", css).strip() + "</style>\n"
-    else:
-        inner = re.sub(r' style="(?:animation-[^";]*;?)+"', "", inner)
+    style = ("<style>" + re.sub(r"\s+", " ", css).strip() + "</style>\n") if css.strip() else ""
     defs = "<defs>" + "".join(v for v in _atlas.values() if v) + "</defs>\n"
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" '
-        f'role="img" aria-labelledby="t d" fill="none" data-now-year="{NOW_YEAR}">\n'
+        f'role="img" aria-labelledby="t d" fill="none" data-now-year="{NOW_YEAR}" data-drums-from="{DRUMS_FROM}" data-still-at="{still_at:.6g}">\n'
         f'<title id="t">{title}</title>\n<desc id="d">{desc}</desc>\n'
         + style + defs + inner + "\n</svg>\n"
     )
 
 
-# Every asset the README shows, in page order. A moving panel is written with
-# and without motion; a still panel is written once per finish.
-MOTION, STILL = True, False
-ASSETS = (
-    ("header", header, MOTION),
-    ("pipeline", pipeline, MOTION),
-    ("stack", stack, STILL),
-    ("record", record, STILL),
-)
+ASSETS = (("header", header), ("pipeline", pipeline))
 MAX_BYTES = 120 * 1024
 
 
@@ -808,11 +816,10 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     check_palette()
     check_cvd()
-    for theme in FINISH:
+    for theme in CASE:
         t = tokens(theme)
-        for stem, draw, moves in ASSETS:
-            variants = (("", True), ("-static", False)) if moves else (("", False),)
-            for suffix, motion in variants:
+        for stem, draw in ASSETS:
+            for suffix, motion in (("", True), ("-static", False)):
                 path = out / f"{stem}{suffix}-{theme}.svg"
                 path.write_text(draw(t, motion), encoding="utf-8")
                 size = path.stat().st_size
