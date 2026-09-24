@@ -1,4 +1,4 @@
 node_modules/
 tools/out/
-tools/.fontcache/
 __pycache__/
+tools/.fontcache/
