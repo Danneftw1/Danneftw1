@@ -3,14 +3,15 @@
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/header-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-  <img alt="Daniel Nilsson — LLM engineering, full-stack, Göteborg. A studio-hardware faceplate whose amber display reads INNOVATION DEVELOPER, QUOKKA · GOTHENBURG, with the NOW lamp lit." src="assets/header-light.svg" width="100%">
+  <img alt="Daniel Nilsson — LLM engineering, full-stack, Göteborg. Neon on an ink-wash scroll, with three lit rows: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, seventeen years, playing and recording." src="assets/header-light.svg" width="100%">
 </picture>
 
 I build LLM pipelines and the products around them: multi-stage prompts, parallel model calls,
 the TypeScript and Python services that run them, and the Azure infrastructure underneath.
 Innovation developer at **Quokka** in Gothenburg, building AI-powered products end to end.
-I have played and recorded drums for seventeen years, which is why this page is drawn as studio
-hardware.
+I have played and recorded drums for seventeen years. The page is drawn in the style of
+[Neon Sumi](https://github.com/Danneftw1/nami-sumi-cc-statusline), the status line I made for
+Claude Code: neon only for what is live, everything else ink and paper.
 
 ## How I build
 
@@ -52,10 +53,10 @@ hardware.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record. Current, pulled out: innovation developer at Quokka; side projects, mostly private; drums, seventeen years, since about 2009. Ended: some C, 2025; IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
+  <img alt="Record. Current, lit in neon: innovation developer at Quokka; side projects, mostly private; drums, seventeen years, since about 2009. Ended, in ink: some C, 2025; IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
 </picture>
 
-<sub>Pulled out means current; the rest is ordered by when it ended. Only dates on record are shown.</sub>
+<sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown.</sub>
 
 - **Innovation developer, Quokka** — Gothenburg, now
 - **Side projects** — now, hobby, mostly private
@@ -65,6 +66,8 @@ hardware.
 
 ## Now
 
+- **[Neon Sumi](https://github.com/Danneftw1/nami-sumi-cc-statusline)** — a status line for Claude Code that
+  shows context, limits, the PR and the ports that are up. Free and open source.
 - **Claude Code setup** — hooks, subagents, slash commands and MCP config, plus a plain-text ledger. Private.
 - **Genealogy site** — two family lines; every fact is graded by how well it is sourced, and the grade
   decides how it is drawn: solid ink or dashed pencil. Private.
@@ -110,7 +113,8 @@ Bicep · GitHub Actions · Claude Code / Cursor workflows · AI-assisted code re
 **Education:** AI and machine learning at IT-högskolan; archived public coursework, 2022–2024.
 Some C, 2025.
 
-**Side projects** (hobby, mostly private): Claude Code setup · genealogy site · DSP-to-DAW map ·
+**Side projects** (hobby, mostly private): Neon Sumi, an open-source status line for Claude Code ·
+Claude Code setup · genealogy site · DSP-to-DAW map ·
 DrumbBrain (research phase, no code yet) · filling gaps in networking and low-level computing.
 
 **Drums:** seventeen years, playing and recording.
@@ -119,9 +123,9 @@ DrumbBrain (research phase, no code yet) · filling gaps in networking and low-l
 
 ---
 
-<sub>The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in both
-finishes, with and without motion, from one set of geometry and a palette it checks for contrast and
-colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
+<sub>The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in Neon
+Sumi's palette, with and without motion, from one set of geometry, and checks that palette for contrast
+and colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
 image blocks at 390, 430 and 896 px in both themes, in the light-on-dark view the GitHub apps show, and
 with motion off, on every pull request ([`check.yml`](.github/workflows/check.yml)). Nothing here loads
 from a third party.</sub>
