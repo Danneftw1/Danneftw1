@@ -1,31 +1,35 @@
 #!/usr/bin/env python3
-"""Draws the profile README's artwork: one made-up piece of studio hardware,
-built in Göteborg, shown as four panels.
+"""Draws the profile README's artwork in the Neon Sumi style: neon tubes on an
+ink-wash scroll, shown as four panels.
 
-  header    the faceplate: name, role, and a glass display that says the job
-  pipeline  the signal path, printed on the panel: the real LLM architecture
+  header    the scroll: name, role, and three lit rows that say what is current
+  pipeline  the signal path in ink, with neon lamps that walk it: the real LLM
+            architecture
   stack     every tool as a chip on the stage it serves
-  record    what is current is pulled out of the rack; what ended sits flush
+  record    what is current is lit; what ended is ink
 
-Why a generator instead of hand-written files: each panel exists in two
-finishes (GitHub's light and dark themes) and, where it moves, again without
-motion. The geometry is written once and the palette is a lookup, so the files
-cannot disagree about anything but colour.
+Neon Sumi is the open-source status line for Claude Code at
+github.com/Danneftw1/nami-sumi-cc-statusline; this page borrows its palette,
+its type and its one rule.
 
 The rules the drawing keeps:
 
-  * print never moves, only light moves. Animation is opacity alone, stepped,
-    on a 96 BPM grid; the file's base style is the finished rest pose, so the
-    reduced-motion file is exactly what the animation settles on;
-  * two type families, split by who wrote the text — Lexend Deca for anything
-    a person wrote, IBM Plex Mono for silkscreen and machine text. The 5×7 dot
-    matrix is display technology, drawn as geometry, and only ever behind glass;
-  * one hue per meaning, and never hue alone. Amber is live light and lives only
-    on glass. Coral, cornflower, teal and orchid mark the stage a thing belongs
-    to, always inside an ink keyline and always with its printed name;
-  * the weight of the ink is the certainty: known facts are solid ink, the one
-    approximate fact (drums since ~2009) is dashed pencil, and anything undated
-    is simply not drawn — Quokka is NOW, never a start year;
+  * neon is reserved for what is live. Everything static is ink and paper;
+    light appears only on lamps and tubes, and only for things that are
+    current. Ink never moves, only light moves, and the file's base style is
+    the finished rest pose, so the reduced-motion file is exactly what the
+    animation settles on;
+  * two type families, split by who wrote the text: Zen Kaku Gothic New for
+    anything a person wrote, Maple Mono for labels and machine text;
+  * one hue per meaning, and never hue alone. Magenta is live light. Four stage
+    hues mark where a thing belongs, always as an outline around its printed
+    name;
+  * the weight of the ink is the certainty: the one approximate fact (drums
+    since ~2009) is dashed, and anything undated is simply not drawn — Quokka
+    is NOW, never a start year;
+  * one finish. Neon Sumi is dark by design, so every panel is a sumi scroll
+    that hangs on either GitHub page; the light and dark files are written
+    identical, which keeps the README's light/dark/reduced-motion pairs whole;
   * the phone is the main case: a 390 px phone shows the 1100-unit-wide panel
     at 358 CSS px, so no text is under 31 units and no mark under 5.
 
@@ -60,24 +64,25 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 CACHE = HERE / ".fontcache"
 
-# Immutable gstatic URLs (they carry a content hash in the path) plus our own
-# sha256, so a swapped file is caught rather than silently redrawn.
+# Immutable URLs (Google's carry a content hash in the path, Fontsource's a
+# package version) plus our own sha256, so a swapped file is caught rather
+# than silently redrawn. Both families are SIL OFL 1.1.
 FONTS = {
-    "human-semibold": (
-        "https://fonts.gstatic.com/s/lexenddeca/v25/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4LspArA.ttf",
-        "a4628902190f4fb22f52177070b7f6ae0b849c3a7bbb4133059ca46e285961f1",
+    "human-regular": (
+        "https://fonts.gstatic.com/s/zenkakugothicnew/v18/gNMYW2drQpDw0GjzrVNFf_valaDBcznOkjs.ttf",
+        "67f17ccc7a7f5a26f799feb9cf647fe509648f9943ecaadb745615504f9666d4",
     ),
-    "human-light": (
-        "https://fonts.gstatic.com/s/lexenddeca/v25/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4rs1ArA.ttf",
-        "7f192f14a030a76521c3f155fe7bf10d208f23901a21a1c39a9bf28cb2e67a15",
+    "human-bold": (
+        "https://fonts.gstatic.com/s/zenkakugothicnew/v18/gNMVW2drQpDw0GjzrVNFf_valaDBcznOqodNaWQ.ttf",
+        "d4e8a9a774fa516121fc04b8187b56d57139419db49fd86d06c331619f68f03b",
     ),
-    "machine-medium": (
-        "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJ8lc.ttf",
-        "4fc14a73ca53ba9d32fd759ae1ca1a3133326035d0dd337862b3ee1633cc156e",
+    "machine-regular": (
+        "https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.ttf",
+        "401f12b971d0f97370369e00b8d4d34fa81ca6301f5db41c9ce6710b35a78100",
     ),
-    "machine-semibold": (
-        "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3vAO8lc.ttf",
-        "754dfc9d50cf7aabfb6b108d2c2f7d20a3f1f2cc6f6c01640c6728091272cec0",
+    "machine-bold": (
+        "https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-700-normal.ttf",
+        "679227e18f86d22f391734e01d51d420dc1798c8ede7c69d46599d9d11d0750b",
     ),
 }
 
@@ -87,7 +92,7 @@ FONTS = {
 # Every date the artwork states. "Seventeen years" is written out on the page,
 # so the arithmetic is asserted rather than trusted.
 NOW_YEAR = 2026
-DRUMS_FROM = 2009  # approximate: drawn as pencil, never as ink
+DRUMS_FROM = 2009  # approximate: drawn dashed, never solid
 assert NOW_YEAR - DRUMS_FROM == 17, "the page says seventeen years of drums — update the wording"
 
 # --------------------------------------------------------------------- clock
@@ -110,39 +115,38 @@ def pct(t: float, dur: float) -> str:
     return f"{100 * t / dur:.4g}%"
 
 
-# The cold open: two sixteenths of silence, a sixteen-step fill in 32nds,
-# then one sixteenth where every display dot lights, then the downbeat.
-T_FILL = 4 * S32
-T_TEST = T_FILL + 16 * S32
-T_BOOT = T_TEST + 2 * S32   # 1.71875 s: the downbeat; every loop starts here
+# The cold open: the tubes strike on a two-bar flicker, then the downbeat.
+T_BOOT = 2 * BEAT   # 1.25 s: every loop starts here
 
 # ------------------------------------------------------------------- palette
 
-# Two finishes of one instrument: sage enamel on the light page, pine graphite
-# on the dark one. Glass, lamps and stage caps are physical parts, so they are
-# the same in both files.
-FINISH = {
-    "light": {"plate": "#DDE3D6", "tint": "#CFD7C8", "edge": "#7E897F", "lip": "#65705F",
-              "ink": "#1B211D", "muted": "#4E5A51", "knob": "#1B211D", "pointer": "#DDE3D6"},
-    "dark": {"plate": "#1C2320", "tint": "#26302B", "edge": "#6B786F", "lip": "#080B0A",
-             "ink": "#E9EFE6", "muted": "#A7B3AA", "knob": "#C9D2C6", "pointer": "#1B211D"},
+# Neon Sumi's own tokens, from its Obsidian theme. Ink and paper are the
+# print; the neon is light.
+SUMI = {
+    "sumi": "#0F0C0D",    # the scroll's ground
+    "raised": "#171314",  # a raised surface: nodes, rows that are current
+    "deep": "#0B090A",    # a sunken surface: chips, lamp sockets
+    "wash": "#1E181A",    # the ink-wash, only ever blurred
+    "line": "#2C2426",    # brush strokes, decorative only
+    "ink": "#544A46",     # faint marks, decorative only
+    "stone": "#928678",   # secondary text, wires, the scroll's edge
+    "soft": "#CBBFA9",    # text that has ended
+    "paper": "#E8DCC6",   # primary text
 }
-PARTS = {
-    "glass": "#14120E", "bezel": "#221F19", "ghost": "#2A251D",
-    "amber": "#FFB547",      # live, now — only ever on glass
-    "amber_dim": "#8A6428",  # programmed, not current
-    "model": "#F06A4E",      # the model layer
-    "serve": "#6F95F2",      # services
-    "cloud": "#46C2A8",      # runs on Azure
-    "ship": "#E28AD8",       # ships through
-    "cap_ink": "#1B211D",
+NEON = {
+    "live": "#FF2EC4",    # magenta: live, now
+    "model": "#C46EFF",   # violet: the model layer
+    "serve": "#FF3864",   # neon red: services
+    "cloud": "#00FFCC",   # teal: runs on Azure
+    "ship": "#FFBE28",    # amber: ships through
 }
 STAGES = ("model", "serve", "cloud", "ship")
 PAGE = {"light": "#ffffff", "dark": "#0d1117"}
+THEMES = ("light", "dark")
 
 
 def tokens(theme: str) -> dict:
-    return {**FINISH[theme], **PARTS, "theme": theme}
+    return {**SUMI, **NEON, "theme": theme}
 
 
 # ------------------------------------------------------------ palette checks
@@ -164,10 +168,9 @@ def contrast(fg: str, bg: str) -> float:
 
 def check_palette() -> None:
     """Every text role clears 4.5:1 on the surface it is drawn on, every
-    graphic clears 3:1, and every panel edge clears 3:1 against the page it
-    can land on — the light file also lands on the dark page, because the
-    GitHub apps ignore <picture>. Stage caps are exempt against the light
-    plate only because cap() always draws them inside an ink keyline."""
+    graphic that carries meaning clears 3:1, and the scroll clears 3:1 against
+    both GitHub pages it can hang on: its ground against the light page, its
+    edge against the dark one."""
     fails = []
 
     def need(what, fg, bg, floor):
@@ -175,24 +178,16 @@ def check_palette() -> None:
         if r < floor:
             fails.append(f"{what}: {r}:1 < {floor}:1")
 
-    for theme in FINISH:
-        t = tokens(theme)
-        for role in ("ink", "muted"):
-            for surf in ("plate", "tint"):
-                need(f"{theme} {role} on {surf}", t[role], t[surf], 4.5)
-        need(f"{theme} ink keyline on plate", t["ink"], t["plate"], 3)
-        need(f"{theme} knob on plate", t["knob"], t["plate"], 3)
-        need(f"{theme} pointer on knob", t["pointer"], t["knob"], 3)
-        need(f"{theme} amber on glass", t["amber"], t["glass"], 4.5)
-        need(f"{theme} amber_dim on glass", t["amber_dim"], t["glass"], 3)
-        for s in STAGES:
-            need(f"cap ink on {s}", t["cap_ink"], t[s], 4.5)
-    need("light edge on #ffffff", FINISH["light"]["edge"], PAGE["light"], 3)
-    need("light edge on #0d1117", FINISH["light"]["plate"], PAGE["dark"], 3)
-    need("dark edge on #0d1117", FINISH["dark"]["edge"], PAGE["dark"], 3)
-    need("dark glass ring", FINISH["dark"]["edge"], PARTS["glass"], 3)
-    if lum(PARTS["amber"]) / lum(PARTS["amber_dim"]) < 2.5:
-        fails.append("amber and amber_dim are too close in luminance to read as lit versus dim")
+    t = tokens("dark")
+    for role in ("paper", "soft", "stone"):
+        for surf in ("sumi", "raised", "deep"):
+            need(f"{role} on {surf}", t[role], t[surf], 4.5)
+    need("live text on raised", t["live"], t["raised"], 4.5)
+    need("wires on sumi", t["stone"], t["sumi"], 3)
+    for s in ("live",) + STAGES:
+        need(f"{s} on raised", t[s], t["raised"], 3)
+    need("scroll on #ffffff", t["sumi"], PAGE["light"], 3)
+    need("scroll edge on #0d1117", t["stone"], PAGE["dark"], 3)
     if fails:
         raise SystemExit("palette:\n  " + "\n  ".join(fails))
 
@@ -217,7 +212,7 @@ def _lab(lin: list[float]) -> tuple[float, float, float]:
 def check_cvd() -> None:
     """Hue is never the only cue, but the stage hues should still separate
     for a reader with a colour-vision deficiency — Daniel runs a daltonized
-    theme. ΔE76 in Lab after simulation: stages ≥ 15 apart, amber ≥ 12."""
+    theme. ΔE76 in Lab after simulation: stages ≥ 15 apart, live ≥ 12."""
     fails, worst = [], 999.0
     for kind, m in CVD.items():
         def sim(c):
@@ -225,15 +220,15 @@ def check_cvd() -> None:
             return _lab([sum(m[i][j] * v[j] for j in range(3)) for i in range(3)])
 
         def de(a, b):
-            return math.dist(sim(PARTS[a]), sim(PARTS[b]))
+            return math.dist(sim(NEON[a]), sim(NEON[b]))
         for i, a in enumerate(STAGES):
             for b in STAGES[i + 1:]:
                 d = de(a, b)
                 worst = min(worst, d)
                 if d < 15:
                     fails.append(f"{kind}: {a}/{b} ΔE {d:.1f} < 15")
-            if de("amber", a) < 12:
-                fails.append(f"{kind}: amber/{a} ΔE {de('amber', a):.1f} < 12")
+            if de("live", a) < 12:
+                fails.append(f"{kind}: live/{a} ΔE {de('live', a):.1f} < 12")
     if fails:
         raise SystemExit("colour-vision separation:\n  " + "\n  ".join(fails))
     print(f"  palette ok; closest stage pair under simulation ΔE {worst:.1f}")
@@ -243,7 +238,7 @@ def check_cvd() -> None:
 
 _loaded: dict = {}
 _shaped: dict = {}
-SHORT = {"human-semibold": "hs", "human-light": "hl", "machine-medium": "mm", "machine-semibold": "ms"}
+SHORT = {"human-regular": "hr", "human-bold": "hb", "machine-regular": "mr", "machine-bold": "mb"}
 MIN_TEXT = 31  # viewBox units at 1100 wide: ~10 CSS px on a 390 px phone
 
 
@@ -351,205 +346,136 @@ def wrap(name: str, text: str, size: float, width: float, tracking: float = 0.0)
     return lines
 
 
-# ------------------------------------------------------- the 5×7 dot matrix
-
-DOT = 6        # pitch; every lit dot sits on the ghost grid (centres ≡ 3 mod 6)
-ADVANCE = 36   # five columns and a gap
-MATRIX = {
-    "A": "01110 10001 10001 11111 10001 10001 10001", "B": "11110 10001 10001 11110 10001 10001 11110",
-    "C": "01110 10001 10000 10000 10000 10001 01110", "D": "11100 10010 10001 10001 10001 10010 11100",
-    "E": "11111 10000 10000 11110 10000 10000 11111", "F": "11111 10000 10000 11110 10000 10000 10000",
-    "G": "01110 10001 10000 10111 10001 10001 01111", "H": "10001 10001 10001 11111 10001 10001 10001",
-    "I": "01110 00100 00100 00100 00100 00100 01110", "J": "00111 00010 00010 00010 00010 10010 01100",
-    "K": "10001 10010 10100 11000 10100 10010 10001", "L": "10000 10000 10000 10000 10000 10000 11111",
-    "M": "10001 11011 10101 10101 10001 10001 10001", "N": "10001 10001 11001 10101 10011 10001 10001",
-    "O": "01110 10001 10001 10001 10001 10001 01110", "P": "11110 10001 10001 11110 10000 10000 10000",
-    "Q": "01110 10001 10001 10001 10101 10010 01101", "R": "11110 10001 10001 11110 10100 10010 10001",
-    "S": "01111 10000 10000 01110 00001 00001 11110", "T": "11111 00100 00100 00100 00100 00100 00100",
-    "U": "10001 10001 10001 10001 10001 10001 01110", "V": "10001 10001 10001 10001 10001 01010 00100",
-    "W": "10001 10001 10001 10101 10101 10101 01010", "X": "10001 10001 01010 00100 01010 10001 10001",
-    "Y": "10001 10001 01010 00100 00100 00100 00100", "Z": "11111 00001 00010 00100 01000 10000 11111",
-    "·": "00000 00000 00000 00100 00000 00000 00000", "-": "00000 00000 00000 11111 00000 00000 00000",
-    "~": "00000 00000 01000 10101 00010 00000 00000", " ": "00000 00000 00000 00000 00000 00000 00000",
-}
-
-
-def snap(v: float) -> int:
-    """Nearest dot centre on the ghost grid."""
-    return int(round((v - 3) / DOT) * DOT + 3)
-
-
-def dots(text: str, x: float, y: float, fill: str) -> str:
-    """Dot-matrix text; (x, y) is the centre of the first glyph's top-left dot.
-    A dot is a zero-length round-capped stroke, the smallest way to draw one."""
-    x, y = snap(x), snap(y)
-    out = []
-    for i, ch in enumerate(text):
-        assert ch in MATRIX, f"the dot matrix has no {ch!r} — add it to MATRIX"
-        if ch == " ":
-            continue
-        key = "dm" + str(ord(ch))
-        if key not in _atlas:
-            rows = MATRIX[ch].split()
-            d = "".join(f"M{c * DOT} {r * DOT}h0" for r, row in enumerate(rows) for c, v in enumerate(row) if v == "1")
-            _atlas[key] = f'<path id="{key}" d="{d}"/>'
-        out.append(f'<use href="#{key}" x="{x + i * ADVANCE}" y="{y}"/>')
-    return (f'<g stroke="{fill}" stroke-width="5" stroke-linecap="round" fill="none">'
-            + "".join(out) + "</g>")
-
-
-def dots_width(text: str) -> int:
-    return (len(text) - 1) * ADVANCE + 4 * DOT
-
-
 # ---------------------------------------------------------------- primitives
 
-LIP = 12  # the chassis band under a plate: the panel is an object, not a card
+def filters(w: int, h: int) -> None:
+    """The three effects, registered once per file. Every region is the whole
+    panel in user space: a tube is a zero-height line, and an objectBoundingBox
+    region on a zero-height box is empty, so the tube would vanish."""
+    region = f'filterUnits="userSpaceOnUse" x="0" y="0" width="{w}" height="{h}"'
+    _atlas["glow"] = (f'<filter id="glow" {region} color-interpolation-filters="sRGB">'
+                      '<feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>'
+                      '<feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>')
+    _atlas["wash"] = f'<filter id="wash" {region}><feGaussianBlur stdDeviation="56"/></filter>'
+    _atlas["brush"] = (f'<filter id="brush" {region}><feTurbulence type="fractalNoise" baseFrequency="0.03" '
+                       'numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="16"/></filter>')
+    _atlas["card"] = f'<clipPath id="card"><rect x="2.5" y="2.5" width="{w - 5}" height="{h - 5}" rx="15"/></clipPath>'
 
 
-def plate(t: dict, w: int, h: int) -> list[str]:
-    """The panel: chassis lip, face, edge, four flush screws."""
-    out = [f'<rect x="1.25" y="{1.25 + LIP}" width="{w - 2.5}" height="{h - 2.5}" rx="14" fill="{t["lip"]}"/>',
-           f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="14" fill="{t["plate"]}" '
-           f'stroke="{t["edge"]}" stroke-width="2.5"/>']
-    for cx, cy in ((28, 28), (w - 28, 28), (28, h - 28), (w - 28, h - 28)):
-        out.append(f'<circle cx="{cx}" cy="{cy}" r="11" fill="{t["tint"]}" stroke="{t["edge"]}" stroke-width="2.5"/>'
-                   f'<path d="M{cx - 6} {cy + 6}L{cx + 6} {cy - 6}" stroke="{t["edge"]}" stroke-width="5"/>')
+def scroll(t: dict, w: int, h: int, blobs=()) -> list[str]:
+    """The panel: a sumi ground, an ink-wash that never moves, a stone edge so
+    the scroll still has a shape on GitHub's dark page."""
+    filters(w, h)
+    out = [f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="16" fill="{t["sumi"]}"/>']
+    if blobs:
+        out.append(f'<g clip-path="url(#card)"><g filter="url(#wash)" fill="{t["wash"]}">'
+                   + "".join(f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}"/>' for cx, cy, rx, ry in blobs)
+                   + "</g></g>")
     return out
 
 
-def glass(t: dict, x, y, w, h) -> str:
-    """A display window: the only place light appears. The dark finish rings
-    it, because glass on graphite is barely 1.2:1."""
-    ring = f' stroke="{t["edge"]}" stroke-width="4"' if t["theme"] == "dark" else ""
-    _atlas.setdefault("ghostpat", f'<pattern id="ghost" width="{DOT}" height="{DOT}" patternUnits="userSpaceOnUse">'
-                                  f'<circle cx="3" cy="3" r="2.5" fill="{PARTS["ghost"]}"/></pattern>')
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="{t["glass"]}"{ring}/>'
-            f'<rect x="{x + 6}" y="{y + 6}" width="{w - 12}" height="{h - 12}" rx="6" fill="url(#ghost)"/>')
+def edge(t: dict, w: int, h: int) -> str:
+    return (f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="16" '
+            f'stroke="{t["stone"]}" stroke-width="2.5"/>')
 
 
-def led(t: dict, cx, cy, cls: str, lit: bool) -> str:
+def lamp(t: dict, cx, cy, cls: str = "", lit: bool = True, hue: str = "live") -> str:
+    """A neon lamp in its socket. r 15 / 8: a lamp has to read on a 390 px
+    phone, where the panel is a third size."""
     op = "" if lit else ' opacity="0"'
-    # r 14 / 8: a lamp has to read on a 390 px phone, where the panel is a third size.
-    return (f'<circle cx="{cx}" cy="{cy}" r="14" fill="{t["bezel"]}"/>'
-            f'<circle cx="{cx}" cy="{cy}" r="8" fill="{t["ghost"]}"/>'
-            f'<circle class="{cls}" cx="{cx}" cy="{cy}" r="8" fill="{t["amber"]}"{op}/>')
+    c = f' class="{cls}"' if cls else ""
+    return (f'<circle cx="{cx}" cy="{cy}" r="15" fill="{t["deep"]}" stroke="{t["line"]}" stroke-width="2.5"/>'
+            f'<circle{c} cx="{cx}" cy="{cy}" r="8" fill="{t[hue]}" filter="url(#glow)"{op}/>')
 
 
-def cap(t: dict, x, y, w, h, hue: str, text: str | None = None, tx=None, lines=None) -> str:
-    """A stage cap: a stage hue always inside a 5-unit ink keyline, always with
-    its name printed on it — so the hue is never the only thing saying it."""
-    out = [f'<rect x="{x + 2.5}" y="{y + 2.5}" width="{w - 5}" height="{h - 5}" rx="8" '
-           f'fill="{t[hue]}" stroke="{t["ink"]}" stroke-width="5"/>']
+def node(t: dict, x, y, w, h, hue: str, text: str | None = None, lines=None) -> str:
+    """A stage node: ink ground, its stage hue as an outline, and its name
+    printed in paper — so the hue is never the only thing saying it."""
+    out = [f'<rect x="{x + 1.5}" y="{y + 1.5}" width="{w - 3}" height="{h - 3}" rx="10" '
+           f'fill="{t["raised"]}" stroke="{t[hue]}" stroke-width="3"/>']
     lines = lines or ([text] if text else [])
-    ch = cap_height("machine-semibold", 31)
+    ch = cap_height("machine-bold", 31)
     lead = 38
     top = y + h / 2 - (ch + lead * (len(lines) - 1)) / 2 + ch
     for i, ln in enumerate(lines):
-        left = tx if tx is not None else x + 20
-        room = (x + w - 20) - left if tx is None or tx >= x else w - 40
-        out.append(label("machine-semibold", ln, 31, left, top + i * lead, t["cap_ink"], 0.08, fit=room + 8)[0])
+        out.append(label("machine-bold", ln, 31, x + 20, top + i * lead, t["paper"], 0.06, fit=w - 32)[0])
     return "".join(out)
 
 
 def chip(t: dict, x, y, text: str) -> tuple[str, float]:
-    w = measure("human-light", text, 32) + 40
-    ch = cap_height("human-light", 32)
-    return (f'<rect x="{x + 1.5}" y="{y + 1.5}" width="{w - 3:.1f}" height="49" rx="8" fill="{t["tint"]}" '
-            f'stroke="{t["muted"]}" stroke-width="3"/>'
-            + label("human-light", text, 32, x + 20, y + 26 + ch / 2, t["ink"])[0], w)
+    w = measure("human-regular", text, 32) + 40
+    ch = cap_height("human-regular", 32)
+    return (f'<rect x="{x + 1.25}" y="{y + 1.25}" width="{w - 2.5:.1f}" height="49.5" rx="10" fill="{t["deep"]}" '
+            f'stroke="{t["line"]}" stroke-width="2.5"/>'
+            + label("human-regular", text, 32, x + 20, y + 26 + ch / 2, t["paper"])[0], w)
 
 
 def wire(t: dict, *pts) -> str:
     d = "M" + "L".join(f"{x} {y}" for x, y in pts)
-    return f'<path d="{d}" stroke="{t["ink"]}" stroke-width="6" stroke-linejoin="round" fill="none"/>'
+    return f'<path d="{d}" stroke="{t["stone"]}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>'
 
 
-def style_attr(**props) -> str:
-    return ' style="' + ";".join(f"animation-{k.replace('_', '-')}:{v}" for k, v in props.items()) + '"'
+def enso(t: dict, cx, cy, r, start, sweep, width) -> str:
+    """One brush stroke of ink: an open circle, roughened, never animated."""
+    a0, a1 = math.radians(start), math.radians(start + sweep)
+    x0, y0 = cx + r * math.cos(a0), cy + r * math.sin(a0)
+    x1, y1 = cx + r * math.cos(a1), cy + r * math.sin(a1)
+    big = 1 if sweep > 180 else 0
+    return (f'<path d="M{x0:.1f} {y0:.1f}A{r} {r} 0 {big} 1 {x1:.1f} {y1:.1f}" stroke="{t["line"]}" '
+            f'stroke-width="{width}" stroke-linecap="round" filter="url(#brush)"/>')
 
 
 # -------------------------------------------------------------------- header
 
-HEADER_W, HEADER_H = 1100, 568
-PAGES = (  # knob detent, display line 1, display line 2
-    ("ROLE", "INNOVATION DEVELOPER", "QUOKKA · GOTHENBURG"),
-    ("BUILD", "LLM PIPELINES", "END TO END"),
-    ("DRUMS", "DRUMS", "SEVENTEEN YEARS"),
+HEADER_W, HEADER_H = 1100, 548
+ROWS = (  # key, what is current
+    ("NOW", "Innovation developer at Quokka"),
+    ("BUILD", "LLM pipelines, end to end"),
+    ("DRUMS", "Seventeen years, playing and recording"),
 )
 
 
 def header(t: dict, motion: bool = True) -> str:
     _atlas.clear()
-    out = plate(t, HEADER_W, HEADER_H)
+    out = scroll(t, HEADER_W, HEADER_H, blobs=((880, 120, 300, 170), (240, 500, 400, 120), (640, 330, 220, 90)))
     add = out.append
+    add(enso(t, 958, 150, 104, 130, 300, 22))
 
-    add(label("human-semibold", "Daniel Nilsson", 96, 56, 128, t["ink"], -0.02, fit=780)[0])
-    add(label("human-light", "LLM engineering · full-stack · Göteborg", 40, 58, 186, t["muted"], fit=780)[0])
+    svg_, w = label("human-bold", "Daniel Nilsson", 100, 56, 146, t["paper"], -0.01, fit=780)
+    add(svg_)
+    add(label("human-regular", "LLM engineering · full-stack · Göteborg", 40, 58, 262, t["stone"], fit=780)[0])
 
-    # The PAGE knob. Its legend is silkscreen; the pointer is drawn inside
-    # each display page, so the knob can never disagree with the display.
-    kx, ky = 1000, 104
-    detents = []
-    for i, (name, _, _) in enumerate(PAGES):
-        base = 70 + 38 * i
-        add(label("machine-medium", name, 31, 940, base, t["muted"], 0.08, anchor="end")[0])
-        mid = base - cap_height("machine-medium", 31) / 2
-        add(f'<path d="M948 {mid:.1f}H958" stroke="{t["muted"]}" stroke-width="5"/>')
-        detents.append(math.atan2(mid - ky, 952 - kx))
-    add(f'<circle cx="{kx}" cy="{ky}" r="38" fill="{t["knob"]}" stroke="{t["edge"]}" stroke-width="2.5"/>')
+    # The tube under the name: the one neon line on the scroll, lit because the
+    # person is. The current is a short bright run that travels it. The strike
+    # flicker starts lit, so a viewer that freezes the first frame still shows
+    # every tube on.
+    tube = f"M60 190H{56 + w:.1f}"
+    add(f'<g class="lit"><path d="{tube}" stroke="{t["live"]}" stroke-width="7" stroke-linecap="round" '
+        f'filter="url(#glow)"/></g>')
+    run = 90
+    add(f'<path class="cur" d="{tube}" stroke="#FFD9F4" stroke-width="3" stroke-linecap="round" '
+        f'stroke-dasharray="{run} {w + 2 * run:.0f}" opacity="0"/>')
 
-    def pointer(a):
-        x1, y1 = kx + 10 * math.cos(a), ky + 10 * math.sin(a)
-        x2, y2 = kx + 30 * math.cos(a), ky + 30 * math.sin(a)
-        return (f'<path d="M{x1:.1f} {y1:.1f}L{x2:.1f} {y2:.1f}" stroke="{t["pointer"]}" '
-                f'stroke-width="6" stroke-linecap="round"/>')
+    ch = cap_height("machine-bold", 31)
+    for i, (key, what) in enumerate(ROWS):
+        base = 376 + 66 * i
+        mid = base - ch / 2
+        cls = "lit breathe" if key == "NOW" else "lit"
+        add(lamp(t, 76, round(mid, 1), cls))
+        add(label("machine-bold", key, 31, 112, base, t["stone"], 0.08, fit=150)[0])
+        add(label("human-regular", what, 38, 262, base + 1, t["paper"], fit=780)[0])
+    add(edge(t, HEADER_W, HEADER_H))
 
-    add(glass(t, 56, 222, 988, 170))
-    boot = []
-    for i, (name, l1, l2) in enumerate(PAGES):
-        for ln in (l1, l2):
-            assert len(ln) <= 20, f"{ln!r} is longer than the display's 20 characters"
-        op = "" if i == 0 else ' opacity="0"'
-        boot.append(f'<g class="pg pg{i}"{op}>{dots(l1, 87, 255, t["amber"])}{dots(l2, 87, 321, t["amber"])}'
-                    f'{pointer(detents[i])}</g>')
-    # NOW: steady, never blinks.
-    boot.append(f'<rect x="882" y="264" width="18" height="18" fill="{t["amber"]}"/>' + dots("NOW", 915, 255, t["amber"]))
-
-    # The bar window: sixteen programmed steps and a cursor that walks them.
-    add(glass(t, 56, 420, 988, 56))
-    cells = [80 + g * 242 + k * 56 for g in range(4) for k in range(4)]
-    for i, x in enumerate(cells):
-        add(f'<rect class="off" x="{x}" y="440" width="44" height="16" fill="{t["amber_dim"]}"'
-            f'{style_attr(duration=secs(T_FILL + i * S32))}/>')
-    for i, x in enumerate(cells):
-        op = "" if i == 0 else ' opacity="0"'
-        boot.append(f'<rect class="cur" x="{x}" y="440" width="44" height="16" fill="{t["amber"]}"{op}'
-                    f'{style_attr(delay=secs(T_BOOT + i * S16))}/>')
-    add(f'<g class="boot">{"".join(boot)}</g>')
-    # The segment test: one sixteenth where every dot lights, on the downbeat.
-    _atlas.setdefault("litpat", f'<pattern id="lit" width="{DOT}" height="{DOT}" patternUnits="userSpaceOnUse">'
-                                f'<circle cx="3" cy="3" r="2.5" fill="{PARTS["amber"]}"/></pattern>')
-    add('<rect class="test" x="62" y="228" width="976" height="158" rx="6" fill="url(#lit)" opacity="0"/>')
-
-    add(label("machine-medium", "TILLVERKAD I GÖTEBORG", 31, 1044, 528, t["muted"], 0.08, anchor="end")[0])
-
-    cycle = 8 * BAR
+    trip = 2 * BAR
     css = f"""
-    .boot{{animation:hide {secs(T_BOOT)} steps(1,end)}}
-    .off{{animation-name:hide;animation-timing-function:steps(1,end)}}
-    @keyframes hide{{0%,100%{{opacity:0}}}}
-    .test{{animation:test {secs(T_BOOT)} steps(1,end)}}
-    @keyframes test{{0%{{opacity:0}}{pct(T_TEST, T_BOOT)},100%{{opacity:1}}}}
-    .pg{{animation:{secs(cycle)} steps(1,end) {secs(T_BOOT)} infinite}}
-    .pg0{{animation-name:p0}}.pg1{{animation-name:p1}}.pg2{{animation-name:p2}}
-    @keyframes p0{{0%{{opacity:1}}50%,100%{{opacity:0}}}}
-    @keyframes p1{{0%{{opacity:0}}50%{{opacity:1}}75%,100%{{opacity:0}}}}
-    @keyframes p2{{0%{{opacity:0}}75%,100%{{opacity:1}}}}
-    .cur{{animation:cur {secs(BAR)} steps(1,end) infinite}}
-    @keyframes cur{{0%{{opacity:1}}{pct(S16, BAR)},100%{{opacity:0}}}}
+    .lit{{animation:strike {secs(T_BOOT)} steps(1,end)}}
+    @keyframes strike{{0%,15%{{opacity:1}}25%{{opacity:.2}}40%{{opacity:1}}50%{{opacity:.35}}65%,100%{{opacity:1}}}}
+    .breathe{{animation:strike {secs(T_BOOT)} steps(1,end),breathe {secs(trip)} ease-in-out {secs(T_BOOT)} infinite}}
+    @keyframes breathe{{0%,100%{{opacity:1}}50%{{opacity:.5}}}}
+    .cur{{animation:cur {secs(trip)} linear {secs(T_BOOT)} infinite}}
+    @keyframes cur{{0%{{opacity:1;stroke-dashoffset:{run}}}100%{{opacity:1;stroke-dashoffset:{-w - run:.0f}}}}}
     """
-    return svg(HEADER_W, HEADER_H + LIP, "Daniel Nilsson — LLM engineering, full-stack, Göteborg",
+    return svg(HEADER_W, HEADER_H, "Daniel Nilsson — LLM engineering, full-stack, Göteborg",
                ALT["header"], css if motion else "", out)
 
 
@@ -595,20 +521,20 @@ def keyframes(name: str, spans: list[tuple[int, int]]) -> str:
 
 def pipeline(t: dict, motion: bool = True) -> str:
     _atlas.clear()
-    out = plate(t, PIPE_W, PIPE_H)
+    out = scroll(t, PIPE_W, PIPE_H, blobs=((300, 120, 320, 120), (860, 520, 360, 120)))
     add = out.append
     boxes: list[tuple[str, float, float, float, float]] = []
 
     def text(s, x, y, anchor="start"):
-        svg_, w = label("machine-medium", s, 31, x, y, t["muted"], 0.08, anchor=anchor)
+        svg_, w = label("machine-regular", s, 31, x, y, t["stone"], 0.08, anchor=anchor)
         x0 = {"start": x, "middle": x - w / 2, "end": x - w}[anchor]
-        boxes.append((s, x0, y - cap_height("machine-medium", 31), x0 + w, y))
+        boxes.append((s, x0, y - cap_height("machine-regular", 31), x0 + w, y))
         add(svg_)
 
     def box(nm, x, y, w, h):
         boxes.append((nm, x, y, x + w, y + h))
 
-    # Wires first, so every cap and lamp sits on top of them.
+    # Wires first, so every node and lamp sits on top of them.
     add(wire(t, (118, 170), (170, 170)))                                  # request -> prompt
     add(wire(t, (400, 170), (470, 170)))                                  # prompt -> split
     add(wire(t, (470, 110), (470, 230)))
@@ -623,36 +549,35 @@ def pipeline(t: dict, motion: bool = True) -> str:
     add(wire(t, (520, 440), (470, 440)))                                  # -> traces
     add(wire(t, (250, 410), (250, 210)))                                  # iterate, back to the prompt
     for x, y0, y1 in ((300, 470, 520), (610, 470, 520), (917, 496, 520)):
-        add(wire(t, (x, y0), (x, y1)))                                    # mounted on the band below
+        add(wire(t, (x, y0), (x, y1)))                                    # runs on the band below
 
-    # The input jack.
-    add(f'<circle cx="96" cy="170" r="22" fill="{t["tint"]}" stroke="{t["ink"]}" stroke-width="6"/>'
-        f'<circle cx="96" cy="170" r="9" fill="{t["glass"]}"/>')
+    # Where a request comes in.
+    add(f'<circle cx="96" cy="170" r="22" fill="{t["deep"]}" stroke="{t["stone"]}" stroke-width="4"/>')
     box("jack", 74, 148, 44, 44)
     text("REQUEST", 56, 238)
 
-    add(cap(t, 170, 130, 230, 80, "model"))
-    box("PROMPT cap", 170, 130, 230, 80)
+    add(node(t, 170, 130, 230, 80, "model"))
+    box("PROMPT node", 170, 130, 230, 80)
     text("PROMPT", 170, 112)
-    add(f'<path d="M215 170H355" stroke="{t["cap_ink"]}" stroke-width="6"/>')
+    add(f'<path d="M215 170H355" stroke="{t["ink"]}" stroke-width="4"/>')
     text("FAN-OUT", 470, 70, "middle")
     for i, y in enumerate((88, 148, 208)):
-        add(cap(t, 520, y, 170, 44, "model", "MODEL"))
+        add(node(t, 520, y, 170, 44, "model", "MODEL"))
         box(f"model {i}", 520, y, 170, 44)
     text("FAN-IN", 740, 70, "middle")
-    add(cap(t, 800, 130, 244, 80, "model", "FILTER"))
+    add(node(t, 800, 130, 244, 80, "model", "FILTER"))
     box("FILTER", 800, 130, 244, 80)
     text("RETRY", 760, 306, "middle")
-    add(cap(t, 790, 400, 254, 96, "serve", lines=["STRUCTURED", "OUTPUT"]))
+    add(node(t, 790, 400, 254, 96, "serve", lines=["STRUCTURED", "OUTPUT"]))
     box("OUTPUT", 790, 400, 254, 96)
-    add(cap(t, 520, 410, 180, 60, "serve", "SERVE"))
+    add(node(t, 520, 410, 180, 60, "serve", "SERVE"))
     box("SERVE", 520, 410, 180, 60)
-    add(cap(t, 130, 410, 340, 60, "model", "TRACES · EVALS"))
+    add(node(t, 130, 410, 340, 60, "model", "TRACES · EVALS"))
     box("TRACES", 130, 410, 340, 60)
     text("ITERATE", 272, 330)
-    add(cap(t, 56, 520, 584, 64, "cloud", "AZURE · INFRA AS CODE"))
+    add(node(t, 56, 520, 584, 64, "cloud", "AZURE · INFRA AS CODE"))
     box("CLOUD", 56, 520, 584, 64)
-    add(cap(t, 656, 520, 388, 64, "ship", "DEPLOY PIPELINE"))
+    add(node(t, 656, 520, 388, 64, "ship", "DEPLOY PIPELINE"))
     box("SHIP", 656, 520, 388, 64)
 
     lamps = {"req": (144, 170), "p1": (215, 170), "p2": (285, 170), "p3": (355, 170), "fo": (435, 170),
@@ -661,7 +586,8 @@ def pipeline(t: dict, motion: bool = True) -> str:
              "it1": (250, 350), "it2": (250, 290)}
     assert set(lamps) == set(STEPS), "every lamp needs a step row, and every row a lamp"
     for nm, (cx, cy) in lamps.items():
-        add(led(t, cx, cy, f"L L-{nm}", nm in REST))
+        add(lamp(t, cx, cy, f"L L-{nm}", nm in REST))
+    add(edge(t, PIPE_W, PIPE_H))
 
     # Nothing printed may overlap anything else printed.
     for i, a in enumerate(boxes):
@@ -671,7 +597,7 @@ def pipeline(t: dict, motion: bool = True) -> str:
 
     css = (f".L{{animation:{secs(LOOP * S16)} steps(1,end) {secs(T_BOOT)} infinite}}"
            + "".join(keyframes(nm, spans) for nm, spans in STEPS.items()))
-    return svg(PIPE_W, PIPE_H + LIP, "How a request moves through the pipelines I build",
+    return svg(PIPE_W, PIPE_H, "How a request moves through the pipelines I build",
                ALT["pipeline"], css if motion else "", out)
 
 
@@ -688,26 +614,27 @@ STACK = (
 
 def stack(t: dict, motion: bool = False) -> str:
     _atlas.clear()
-    out = plate(t, STACK_W, STACK_H)
+    out = scroll(t, STACK_W, STACK_H, blobs=((900, 140, 300, 140), (200, 520, 320, 110)))
     for r, (hue, name, tools) in enumerate(STACK):
         y0 = 48 + 144 * r
-        out.append(cap(t, 56, y0, 144, 52, hue, name))
+        out.append(node(t, 56, y0, 144, 52, hue, name))
         x, y, lines = 224, y0, 1
         for tool in tools:
-            w = measure("human-light", tool, 32) + 40
+            w = measure("human-regular", tool, 32) + 40
             if x + w > 1044:
                 x, y, lines = 224, y + 64, lines + 1
             assert lines <= 2, f"{name}: the chips need a third line"
             svg_, w = chip(t, x, y, tool)
             out.append(svg_)
             x += w + 14
-    return svg(STACK_W, STACK_H + LIP, "Stack, grouped by where each tool acts", ALT["stack"], "", out)
+    out.append(edge(t, STACK_W, STACK_H))
+    return svg(STACK_W, STACK_H, "Stack, grouped by where each tool acts", ALT["stack"], "", out)
 
 
 # -------------------------------------------------------------------- record
 
 REC_W, REC_H = 1100, 636
-RECORD = (  # pulled out (current), title, subtitle, years
+RECORD = (  # current (lit), title, subtitle, years
     (True, "Innovation developer · Quokka", "AI-POWERED PRODUCTS, END TO END", None),
     (True, "Side projects", "HOBBY, MOSTLY PRIVATE", None),
     (True, "Drums · seventeen years", f"PLAYING, RECORDING · SINCE ~{DRUMS_FROM}", None),
@@ -718,34 +645,32 @@ RECORD = (  # pulled out (current), title, subtitle, years
 
 def record(t: dict, motion: bool = False) -> str:
     _atlas.clear()
-    out = plate(t, REC_W, REC_H)
+    out = scroll(t, REC_W, REC_H, blobs=((260, 140, 320, 150), (880, 540, 340, 110)))
     add = out.append
-    add(f'<rect x="40" y="40" width="1020" height="560" rx="8" fill="{t["tint"]}"/>')
-    for x in (40, 1044):
-        add(f'<rect x="{x}" y="40" width="16" height="560" fill="{t["muted"]}"/>')
-        for k in range(5):
-            add(f'<rect x="{x + 4}" y="{76 + 110 * k}" width="8" height="24" rx="4" fill="{t["tint"]}"/>')
-    for i, (pulled, title, sub, years) in enumerate(RECORD):
-        y0 = 56 + 110 * i
-        x0 = 96 if pulled else 56
-        if pulled:
-            add(f'<rect x="{x0}" y="{y0 + LIP}" width="948" height="96" rx="6" fill="{t["lip"]}"/>')
-        add(f'<rect x="{x0 + 1.25}" y="{y0 + 1.25}" width="945.5" height="93.5" rx="6" fill="{t["plate"]}" '
-            f'stroke="{t["edge"]}" stroke-width="2.5"/>')
-        add(label("human-semibold", title, 40, x0 + 32, y0 + 44, t["ink"], fit=698)[0])
-        add(label("machine-medium", sub, 31, x0 + 32, y0 + 80, t["muted"], 0.04, fit=698)[0])
-        if "~" in sub:  # the one approximate fact is pencil: dashed, never solid ink
-            pre = sub[:sub.index("~")]
-            a = x0 + 32 + measure("machine-medium", pre, 31, 0.04)
-            b = x0 + 32 + measure("machine-medium", sub, 31, 0.04)
-            add(f'<path d="M{a:.1f} {y0 + 89}H{b:.1f}" stroke="{t["muted"]}" stroke-width="5" stroke-dasharray="12 8"/>')
-        if pulled:
-            add(glass(t, x0 + 746, y0 + 20, 170, 56))
-            add(f'<rect x="{x0 + 766}" y="{y0 + 39}" width="18" height="18" fill="{t["amber"]}"/>')
-            add(dots("NOW", x0 + 800, y0 + 30, t["amber"]))
+    for i, (lit, title, sub, years) in enumerate(RECORD):
+        y0, x0, w = 56 + 110 * i, 56, 988
+        if lit:
+            add(f'<rect x="{x0 + 1.25}" y="{y0 + 1.25}" width="{w - 2.5}" height="93.5" rx="10" fill="{t["raised"]}" '
+                f'stroke="{t["stone"]}" stroke-width="2.5"/>')
+            add(f'<rect x="{x0 + 20}" y="{y0 + 18}" width="7" height="60" rx="3.5" fill="{t["live"]}" '
+                f'filter="url(#glow)"/>')
+            add(label("human-bold", title, 40, x0 + 52, y0 + 44, t["paper"], fit=700)[0])
+            add(lamp(t, x0 + w - 136, y0 + 48))
+            add(label("machine-bold", "NOW", 34, x0 + w - 32, y0 + 48 + cap_height("machine-bold", 34) / 2,
+                      t["live"], 0.08, anchor="end")[0])
         else:
-            add(label("machine-medium", years, 34, x0 + 916, y0 + 58, t["ink"], 0.04, anchor="end")[0])
-    return svg(REC_W, REC_H + LIP, "Record: what is current, and what ended when", ALT["record"], "", out)
+            add(f'<rect x="{x0 + 1.25}" y="{y0 + 1.25}" width="{w - 2.5}" height="93.5" rx="10" '
+                f'stroke="{t["line"]}" stroke-width="2.5"/>')
+            add(label("human-regular", title, 40, x0 + 52, y0 + 44, t["soft"], fit=700)[0])
+            add(label("machine-regular", years, 34, x0 + w - 32, y0 + 58, t["stone"], 0.04, anchor="end")[0])
+        add(label("machine-regular", sub, 31, x0 + 52, y0 + 80, t["stone"], 0.04, fit=700)[0])
+        if "~" in sub:  # the one approximate fact is dashed, never solid
+            pre = sub[:sub.index("~")]
+            a = x0 + 52 + measure("machine-regular", pre, 31, 0.04)
+            b = x0 + 52 + measure("machine-regular", sub, 31, 0.04)
+            add(f'<path d="M{a:.1f} {y0 + 88}H{b:.1f}" stroke="{t["stone"]}" stroke-width="4" stroke-dasharray="10 7"/>')
+    add(edge(t, REC_W, REC_H))
+    return svg(REC_W, REC_H, "Record: what is current, and what ended when", ALT["record"], "", out)
 
 
 # ---------------------------------------------------------------- alt text
@@ -753,17 +678,18 @@ def record(t: dict, motion: bool = False) -> str:
 # Each file's <desc> and the README's alt text are the same string; the check
 # holds them equal, so a reader who cannot see the panel gets every fact on it.
 ALT = {
-    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. A studio-hardware faceplate whose "
-               "amber display reads INNOVATION DEVELOPER, QUOKKA · GOTHENBURG, with the NOW lamp lit."),
+    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. Neon on an ink-wash scroll, with three "
+               "lit rows: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, "
+               "seventeen years, playing and recording."),
     "pipeline": ("How a request moves: it enters a multi-stage prompt, fans out to three parallel model calls "
                  "and fans back in, passes a content filter that can send one call back to retry, becomes "
                  "structured output, is served, and is traced and evaluated before the prompt is iterated. "
                  "It runs on Azure, written as code, and ships through a deploy pipeline."),
     "stack": "Stack, grouped by where each tool acts. " + " ".join(
         f"{name.title()}: {' · '.join(tools)}." for _, name, tools in STACK),
-    "record": ("Record. Current, pulled out: innovation developer at Quokka; side projects, mostly private; "
-               f"drums, seventeen years, since about {DRUMS_FROM}. Ended: some C, 2025; IT-högskolan, AI and ML "
-               "coursework, 2022–2024."),
+    "record": ("Record. Current, lit in neon: innovation developer at Quokka; side projects, mostly private; "
+               f"drums, seventeen years, since about {DRUMS_FROM}. Ended, in ink: some C, 2025; IT-högskolan, "
+               "AI and ML coursework, 2022–2024."),
 }
 
 
@@ -789,7 +715,7 @@ def svg(w: int, h: int, title: str, desc: str, css: str, body: list[str]) -> str
 
 
 # Every asset the README shows, in page order. A moving panel is written with
-# and without motion; a still panel is written once per finish.
+# and without motion. There is one finish, written under both theme names.
 MOTION, STILL = True, False
 ASSETS = (
     ("header", header, MOTION),
@@ -808,7 +734,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     check_palette()
     check_cvd()
-    for theme in FINISH:
+    for theme in THEMES:
         t = tokens(theme)
         for stem, draw, moves in ASSETS:
             variants = (("", True), ("-static", False)) if moves else (("", False),)
