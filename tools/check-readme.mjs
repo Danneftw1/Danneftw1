@@ -87,7 +87,9 @@ for (const f of built) {
   if (/https?:\/\//.test(svg.replace(/xmlns(?::\w+)?="[^"]*"/g, ""))) sins.push("external reference");
   if (!/<title\b/.test(svg)) sins.push("no <title>");
   if (isStill(f) && /@keyframes|animation[\w-]*\s*:|<animate/.test(svg)) sins.push("a still or static asset animates");
-  if (svg.length > 120 * 1024) sins.push(`${(svg.length / 1024).toFixed(0)} kB, over the 120 kB budget`);
+  // The moving header carries every frame of the wheel; it alone gets 160 kB.
+  const cap = /^header-/.test(f) ? 160 : 120;
+  if (svg.length > cap * 1024) sins.push(`${(svg.length / 1024).toFixed(0)} kB, over the ${cap} kB budget`);
   // A transform-origin needs a unit on both axes. "956 132px" is invalid, the
   // browser drops the whole declaration, and the shape then scales from its own
   // middle — which is how the first cut of the banner had bars floating off the

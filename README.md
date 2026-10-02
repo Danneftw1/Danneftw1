@@ -3,15 +3,16 @@
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/header-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-  <img alt="Daniel Nilsson — LLM engineering, full-stack, Göteborg. Neon on an ink-wash scroll, with three lit rows: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, seventeen years, playing and recording." src="assets/header-light.svg" width="100%">
+  <img alt="Daniel Nilsson — LLM engineering, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one amber spoke that has broken free of the rim. Three lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, seventeen years, playing and recording." src="assets/header-light.svg" width="100%">
 </picture>
 
 I build LLM pipelines and the products around them: multi-stage prompts, parallel model calls,
 the TypeScript and Python services that run them, and the Azure infrastructure underneath.
 Innovation developer at **Quokka** in Gothenburg, building AI-powered products end to end.
-I have played and recorded drums for seventeen years. The page is drawn in the style of
-[Neon Sumi](https://github.com/Danneftw1/nami-sumi-cc-statusline), the status line I made for
-Claude Code: neon only for what is live, everything else ink and paper.
+I have played and recorded drums for seventeen years. The page is drawn in Tecken, the
+character-cell design system my project hub runs on, cut heavier: one face, square cells, the
+inverse cell for what is current, and amber only for the one project that broke free and wears
+its own design.
 
 ## How I build
 
@@ -20,7 +21,7 @@ Claude Code: neon only for what is live, everything else ink and paper.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/pipeline-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/pipeline-light.svg">
-  <img alt="How a request moves: it enters a multi-stage prompt, fans out to three parallel model calls and fans back in, passes a content filter that can send one call back to retry, becomes structured output, is served, and is traced and evaluated before the prompt is iterated. It runs on Azure, written as code, and ships through a deploy pipeline." src="assets/pipeline-light.svg" width="100%">
+  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration." src="assets/pipeline-light.svg" width="100%">
 </picture>
 
 - Multi-stage prompt design with structured output
@@ -53,7 +54,7 @@ Claude Code: neon only for what is live, everything else ink and paper.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record. Current, lit in neon: innovation developer at Quokka; side projects, mostly private; drums, seventeen years, since about 2009. Ended, in ink: some C, 2025; IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
+  <img alt="Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly private; Neon Sumi, open source, tagged free in amber because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: some C, 2025; IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
 </picture>
 
 <sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown.</sub>
@@ -123,9 +124,10 @@ DrumbBrain (research phase, no code yet) · filling gaps in networking and low-l
 
 ---
 
-<sub>The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in Neon
-Sumi's palette, with and without motion, from one set of geometry, and checks that palette for contrast
-and colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
+<sub>The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
+Tecken, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
+text characters, the way donut.c draws its torus — and checks the palette for contrast and
+colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
 image blocks at 390, 430 and 896 px in both themes, in the light-on-dark view the GitHub apps show, and
 with motion off, on every pull request ([`check.yml`](.github/workflows/check.yml)). Nothing here loads
 from a third party.</sub>
