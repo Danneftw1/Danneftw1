@@ -1,37 +1,34 @@
 #!/usr/bin/env python3
-"""Draws the profile README's artwork in the Neon Sumi style: neon tubes on an
-ink-wash scroll, shown as four panels.
+"""Draws the profile README's artwork in Tecken, the character-cell design
+system Navet runs on, cut bolder for a page that is only one person.
 
-  header    the scroll: name, role, and three lit rows that say what is current
-  pipeline  the signal path in ink, with neon lamps that walk it: the real LLM
-            architecture
-  stack     every tool as a chip on the stage it serves
-  record    what is current is lit; what ended is ink
+  header     the name at display size, and Navet's wheel drawn as characters
+             (donut.c generalised to a wheel), turning on a fixed axle while
+             one amber spoke tumbles beside it, free of the rim
+  pipeline   how a request moves, written as one bar of a step sequencer:
+             one channel per stage, hits drawn from the luminance ramp, and an
+             inverse-video playhead that walks the bar at 96 BPM
+  stack      every tool as a square tag on the stage it serves
+  record     a log: what is current wears the inverse cell, what ended is
+             dashed, the one thing that broke free is amber
 
-Neon Sumi is the open-source status line for Claude Code at
-github.com/Danneftw1/nami-sumi-cc-statusline; this page borrows its palette,
-its type and its one rule.
+The rules the drawing keeps, all of them Tecken's:
 
-The rules the drawing keeps:
-
-  * neon is reserved for what is live. Everything static is ink and paper;
-    light appears only on lamps and tubes, and only for things that are
-    current. Ink never moves, only light moves, and the file's base style is
-    the finished rest pose, so the reduced-motion file is exactly what the
-    animation settles on;
-  * two type families, split by who wrote the text: Zen Kaku Gothic New for
-    anything a person wrote, Maple Mono for labels and machine text;
-  * one hue per meaning, and never hue alone. Magenta is live light. Four stage
-    hues mark where a thing belongs, always as an outline around its printed
-    name;
+  * space is quantised, time is continuous. Everything drawn as characters
+    lands on the text grid; whatever moves, moves in whole cells. The file's
+    base style is the rest pose, so the reduced-motion file is exactly what
+    the animation shows on its first frame;
+  * one face, Martian Mono, split by width: condensed for machine text and
+    the display cut, semi-expanded for anything a person wrote;
+  * square corners, one wire weight, no shadow, no gradient. Emphasis is the
+    inverse cell — ink ground, void text — and nothing else;
+  * one hue, and it means one thing: amber is what broke free of the hub and
+    wears its own design. Never hue alone: it always carries a word;
+  * natt first: the dark file is Tecken's night, the light file its day;
   * the weight of the ink is the certainty: the one approximate fact (drums
-    since ~2009) is dashed, and anything undated is simply not drawn — Quokka
-    is NOW, never a start year;
-  * one finish. Neon Sumi is dark by design, so every panel is a sumi scroll
-    that hangs on either GitHub page; the light and dark files are written
-    identical, which keeps the README's light/dark/reduced-motion pairs whole;
+    since ~2009) is dashed, and anything undated is not drawn;
   * the phone is the main case: a 390 px phone shows the 1100-unit-wide panel
-    at 358 CSS px, so no text is under 31 units and no mark under 5.
+    at 358 CSS px, so no text is under 31 units.
 
 Text is converted to outlines. GitHub serves README images under a CSP that
 forbids every external load, so an <img> runs the inline animations but can
@@ -55,6 +52,7 @@ from pathlib import Path
 
 try:
     from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
     from fontTools.ttLib import TTFont
     import uharfbuzz as hb
 except ImportError as e:  # pragma: no cover
@@ -64,26 +62,20 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 CACHE = HERE / ".fontcache"
 
-# Immutable URLs (Google's carry a content hash in the path, Fontsource's a
-# package version) plus our own sha256, so a swapped file is caught rather
-# than silently redrawn. Both families are SIL OFL 1.1.
+# Martian Mono (SIL OFL 1.1), Google's static instances: immutable URLs that
+# carry a content hash, plus our own sha256, so a swapped file is caught
+# rather than silently redrawn. Condensed is wdth 75, semi-expanded 112.5 —
+# Tecken's two widths.
+_GS = "https://fonts.gstatic.com/s/martianmono/v6/2V08KIcADoYhV6w87xrTKjs4CYElh_VS9YA4T"
 FONTS = {
-    "human-regular": (
-        "https://fonts.gstatic.com/s/zenkakugothicnew/v18/gNMYW2drQpDw0GjzrVNFf_valaDBcznOkjs.ttf",
-        "67f17ccc7a7f5a26f799feb9cf647fe509648f9943ecaadb745615504f9666d4",
-    ),
-    "human-bold": (
-        "https://fonts.gstatic.com/s/zenkakugothicnew/v18/gNMVW2drQpDw0GjzrVNFf_valaDBcznOqodNaWQ.ttf",
-        "d4e8a9a774fa516121fc04b8187b56d57139419db49fd86d06c331619f68f03b",
-    ),
-    "machine-regular": (
-        "https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.ttf",
-        "401f12b971d0f97370369e00b8d4d34fa81ca6301f5db41c9ce6710b35a78100",
-    ),
-    "machine-bold": (
-        "https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-700-normal.ttf",
-        "679227e18f86d22f391734e01d51d420dc1798c8ede7c69d46599d9d11d0750b",
-    ),
+    "display": (_GS + "grnQzaVMIE6j15dYY3qvM6W.ttf",
+                "30fb55e2fd37724a7239669d521949f850caee43ab924bcc5837a01d88f3b98a"),   # condensed 800
+    "machine": (_GS + "grnQzaVMIE6j15dYY1Yu86W.ttf",
+                "cdd1b10ee20e85875da821faff8a1467158f1fd428508357a478efac17e7fd9e"),   # condensed 500
+    "machine-bold": (_GS + "grnQzaVMIE6j15dYY2NvM6W.ttf",
+                     "41b6611132208d4ecda1f192a6bb3aa0187cc0f8dc5373326bfe0281e3117611"),  # condensed 700
+    "human": (_GS + "n3nQzaVMIE6j15dYY1qu86W.ttf",
+              "9677bf29ac697ff1d1b6d0eb09df84f339c1d541f907a1ba493a898beee93265"),     # semi-expanded 400
 }
 
 
@@ -111,42 +103,26 @@ def secs(t: float) -> str:
     return f"{t:.6g}s"
 
 
-def pct(t: float, dur: float) -> str:
-    return f"{100 * t / dur:.4g}%"
-
-
-# The cold open: the tubes strike on a two-bar flicker, then the downbeat.
-T_BOOT = 2 * BEAT   # 1.25 s: every loop starts here
-
 # ------------------------------------------------------------------- palette
 
-# Neon Sumi's own tokens, from its Obsidian theme. Ink and paper are the
-# print; the neon is light.
-SUMI = {
-    "sumi": "#0F0C0D",    # the scroll's ground
-    "raised": "#171314",  # a raised surface: nodes, rows that are current
-    "deep": "#0B090A",    # a sunken surface: chips, lamp sockets
-    "wash": "#1E181A",    # the ink-wash, only ever blurred
-    "line": "#2C2426",    # brush strokes, decorative only
-    "ink": "#544A46",     # faint marks, decorative only
-    "stone": "#928678",   # secondary text, wires, the scroll's edge
-    "soft": "#CBBFA9",    # text that has ended
-    "paper": "#E8DCC6",   # primary text
+# Tecken's tokens, verbatim from Navet Live: natt (night) first, dag (day).
+NATT = {
+    "void": "#0a0b0c", "cell": "#131518", "grid": "#25292d", "wire": "#646b72",
+    "ink": "#eceee9", "dim": "#a6aca8", "faint": "#8b918e", "on_ink": "#0a0b0c",
+    "free": "#ffb454", "free_deep": "#2e2110",
 }
-NEON = {
-    "live": "#FF2EC4",    # magenta: live, now
-    "model": "#C46EFF",   # violet: the model layer
-    "serve": "#FF3864",   # neon red: services
-    "cloud": "#00FFCC",   # teal: runs on Azure
-    "ship": "#FFBE28",    # amber: ships through
+DAG = {
+    "void": "#f2f2ee", "cell": "#ffffff", "grid": "#dadbd4", "wire": "#7d8079",
+    "ink": "#0c0d0e", "dim": "#45494b", "faint": "#5c605d", "on_ink": "#f2f2ee",
+    "free": "#8f4e00", "free_deep": "#fbeedd",
 }
-STAGES = ("model", "serve", "cloud", "ship")
 PAGE = {"light": "#ffffff", "dark": "#0d1117"}
 THEMES = ("light", "dark")
 
 
 def tokens(theme: str) -> dict:
-    return {**SUMI, **NEON, "theme": theme}
+    return {**(NATT if theme == "dark" else DAG), "theme": theme,
+            "name": "natt" if theme == "dark" else "dag"}
 
 
 # ------------------------------------------------------------ palette checks
@@ -167,10 +143,9 @@ def contrast(fg: str, bg: str) -> float:
 
 
 def check_palette() -> None:
-    """Every text role clears 4.5:1 on the surface it is drawn on, every
-    graphic that carries meaning clears 3:1, and the scroll clears 3:1 against
-    both GitHub pages it can hang on: its ground against the light page, its
-    edge against the dark one."""
+    """Every text role clears 4.5:1 on the surface it is drawn on, and the
+    panel's wire clears 3:1 against the GitHub page it hangs on — including
+    the day panel on the dark page, which is what the GitHub apps show."""
     fails = []
 
     def need(what, fg, bg, floor):
@@ -178,16 +153,17 @@ def check_palette() -> None:
         if r < floor:
             fails.append(f"{what}: {r}:1 < {floor}:1")
 
-    t = tokens("dark")
-    for role in ("paper", "soft", "stone"):
-        for surf in ("sumi", "raised", "deep"):
-            need(f"{role} on {surf}", t[role], t[surf], 4.5)
-    need("live text on raised", t["live"], t["raised"], 4.5)
-    need("wires on sumi", t["stone"], t["sumi"], 3)
-    for s in ("live",) + STAGES:
-        need(f"{s} on raised", t[s], t["raised"], 3)
-    need("scroll on #ffffff", t["sumi"], PAGE["light"], 3)
-    need("scroll edge on #0d1117", t["stone"], PAGE["dark"], 3)
+    for theme in THEMES:
+        t = tokens(theme)
+        for role in ("ink", "dim", "faint"):
+            for surf in ("void", "cell"):
+                need(f"{t['name']} {role} on {surf}", t[role], t[surf], 4.5)
+        need(f"{t['name']} on_ink on ink", t["on_ink"], t["ink"], 4.5)
+        need(f"{t['name']} free on void", t["free"], t["void"], 4.5)
+        need(f"{t['name']} free on free_deep", t["free"], t["free_deep"], 4.5)
+        need(f"{t['name']} wire on void", t["wire"], t["void"], 3)
+        for page in PAGE.values():
+            need(f"{t['name']} wire on page {page}", t["wire"], page, 3)
     if fails:
         raise SystemExit("palette:\n  " + "\n  ".join(fails))
 
@@ -210,35 +186,31 @@ def _lab(lin: list[float]) -> tuple[float, float, float]:
 
 
 def check_cvd() -> None:
-    """Hue is never the only cue, but the stage hues should still separate
-    for a reader with a colour-vision deficiency — Daniel runs a daltonized
-    theme. ΔE76 in Lab after simulation: stages ≥ 15 apart, live ≥ 12."""
+    """Amber never works alone — it always carries a word — but the free
+    spoke still has to part from the wheel's own greys for a reader with a
+    colour-vision deficiency. Daniel runs a daltonized theme. ΔE76 ≥ 15."""
     fails, worst = [], 999.0
-    for kind, m in CVD.items():
-        def sim(c):
-            v = _lin(c)
-            return _lab([sum(m[i][j] * v[j] for j in range(3)) for i in range(3)])
-
-        def de(a, b):
-            return math.dist(sim(NEON[a]), sim(NEON[b]))
-        for i, a in enumerate(STAGES):
-            for b in STAGES[i + 1:]:
-                d = de(a, b)
+    for theme in THEMES:
+        t = tokens(theme)
+        for kind, m in CVD.items():
+            def sim(c):
+                v = _lin(c)
+                return _lab([sum(m[i][j] * v[j] for j in range(3)) for i in range(3)])
+            for grey in ("ink", "dim", "faint"):
+                d = math.dist(sim(t["free"]), sim(t[grey]))
                 worst = min(worst, d)
                 if d < 15:
-                    fails.append(f"{kind}: {a}/{b} ΔE {d:.1f} < 15")
-            if de("live", a) < 12:
-                fails.append(f"{kind}: live/{a} ΔE {de('live', a):.1f} < 12")
+                    fails.append(f"{t['name']} {kind}: free/{grey} ΔE {d:.1f} < 15")
     if fails:
         raise SystemExit("colour-vision separation:\n  " + "\n  ".join(fails))
-    print(f"  palette ok; closest stage pair under simulation ΔE {worst:.1f}")
+    print(f"  palette ok; free spoke against the greys under simulation ΔE ≥ {worst:.1f}")
 
 
 # ---------------------------------------------------------------- type as paths
 
 _loaded: dict = {}
 _shaped: dict = {}
-SHORT = {"human-regular": "hr", "human-bold": "hb", "machine-regular": "mr", "machine-bold": "mb"}
+SHORT = {"display": "d", "machine": "m", "machine-bold": "b", "human": "h"}
 MIN_TEXT = 31  # viewBox units at 1100 wide: ~10 CSS px on a 390 px phone
 
 
@@ -314,7 +286,7 @@ def _glyph(name: str, gname: str):
     return key if _atlas[key] else None
 
 
-def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", fit=None):
+def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", fit=None, cls=""):
     """Outlined text with its baseline at y. Returns (svg, width). `fit` is the
     width of the field it has to sit in, with 8 units to spare."""
     assert size >= MIN_TEXT, f"{text!r} set at {size} units, under the {MIN_TEXT}-unit phone floor"
@@ -326,351 +298,470 @@ def label(name, text, size, x, y, fill, tracking=0.0, anchor="start", fit=None):
         assert w + 8 <= fit, f"{text!r} is {w:.0f} wide in a {fit:.0f} field — shorten the string, never the size"
     dx = {"start": 0.0, "middle": -w / 2, "end": -w}[anchor]
     uses = "".join(f'<use href="#{k}" x="{gx:g}"/>' for g, gx in run if (k := _glyph(name, g)))
-    return (f'<g fill="{fill}" transform="translate({x + dx:.1f} {y:.1f}) scale({s:.5g} {-s:.5g})">{uses}</g>', w)
+    c = f' class="{cls}"' if cls else ""
+    return (f'<g{c} fill="{fill}" transform="translate({x + dx:.1f} {y:.1f}) scale({s:.5g} {-s:.5g})">{uses}</g>', w)
 
 
-def wrap(name: str, text: str, size: float, width: float, tracking: float = 0.0) -> list[str]:
-    """Break `text` into lines no wider than `width`, measured with the shaper."""
-    lines, line = [], ""
-    for word in text.split():
-        trial = f"{line} {word}".strip()
-        if line and measure(name, trial, size, tracking) > width:
-            lines.append(line)
-            line = word
-        else:
-            line = trial
-    if line:
-        lines.append(line)
-    for ln in lines:
-        assert measure(name, ln, size, tracking) <= width, f"{ln!r} is wider than {width} on its own"
-    return lines
+# ------------------------------------------------------------------ the grid
+
+# Tecken's 20 px text row at the profile's scale. Every row of text sits on it.
+ROW = 48
+PAD = 48
+W = 1100
+
+
+def baseline(row: float, name: str = "machine", size: float = 31) -> float:
+    """The baseline that centres a cap height in grid row `row`."""
+    return row * ROW + ROW / 2 + cap_height(name, size) / 2
 
 
 # ---------------------------------------------------------------- primitives
 
-def filters(w: int, h: int) -> None:
-    """The three effects, registered once per file. Every region is the whole
-    panel in user space: a tube is a zero-height line, and an objectBoundingBox
-    region on a zero-height box is empty, so the tube would vanish."""
-    region = f'filterUnits="userSpaceOnUse" x="0" y="0" width="{w}" height="{h}"'
-    _atlas["glow"] = (f'<filter id="glow" {region} color-interpolation-filters="sRGB">'
-                      '<feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>'
-                      '<feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>')
-    _atlas["wash"] = f'<filter id="wash" {region}><feGaussianBlur stdDeviation="56"/></filter>'
-    _atlas["brush"] = (f'<filter id="brush" {region}><feTurbulence type="fractalNoise" baseFrequency="0.03" '
-                       'numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="16"/></filter>')
-    _atlas["card"] = f'<clipPath id="card"><rect x="2.5" y="2.5" width="{w - 5}" height="{h - 5}" rx="15"/></clipPath>'
+def panel(t: dict, h: int) -> list[str]:
+    return [f'<rect width="{W}" height="{h}" fill="{t["void"]}"/>']
 
 
-def scroll(t: dict, w: int, h: int, blobs=()) -> list[str]:
-    """The panel: a sumi ground, an ink-wash that never moves, a stone edge so
-    the scroll still has a shape on GitHub's dark page."""
-    filters(w, h)
-    out = [f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="16" fill="{t["sumi"]}"/>']
-    if blobs:
-        out.append(f'<g clip-path="url(#card)"><g filter="url(#wash)" fill="{t["wash"]}">'
-                   + "".join(f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}"/>' for cx, cy, rx, ry in blobs)
-                   + "</g></g>")
+def edge(t: dict, h: int) -> str:
+    return f'<rect x="1.25" y="1.25" width="{W - 2.5}" height="{h - 2.5}" stroke="{t["wire"]}" stroke-width="2.5"/>'
+
+
+def rule(t: dict, y: float, x0: float = 0, x1: float = W) -> str:
+    return f'<path d="M{x0} {y}H{x1}" stroke="{t["grid"]}" stroke-width="2.5"/>'
+
+
+TAG_H = 40
+TAG_SIZE = 31
+
+
+def tag(t: dict, x: float, row: float, text: str, kind: str = "plain") -> tuple[str, float]:
+    """Tecken's tag: a square cell with a wire edge. `now` is the inverse cell,
+    `free` the amber one, `ended` dashed and faint."""
+    tw = measure("machine-bold", text, TAG_SIZE, 0.04)
+    w = tw + 24
+    y = row * ROW + (ROW - TAG_H) / 2
+    fill, stroke, ink, dash = {
+        "plain": ("none", t["wire"], t["ink"], ""),
+        "now": (t["ink"], t["ink"], t["on_ink"], ""),
+        "free": (t["free_deep"], t["free"], t["free"], ""),
+        "ended": ("none", t["wire"], t["faint"], ' stroke-dasharray="7 5"'),
+    }[kind]
+    out = (f'<rect x="{x + 1.25:.1f}" y="{y + 1.25:.1f}" width="{w - 2.5:.1f}" height="{TAG_H - 2.5}" '
+           f'fill="{fill}" stroke="{stroke}" stroke-width="2.5"{dash}/>'
+           + label("machine-bold", text, TAG_SIZE, x + 12, baseline(row, "machine-bold", TAG_SIZE), ink, 0.04)[0])
+    return out, w
+
+
+# --------------------------------------------------------------- the wheel
+
+# donut.c generalised to a wheel, after Navet's emblem. Rim radius 1, the
+# wheel's axle is local z. The profile's cut: the axle never precesses — the
+# wheel turns on a fixed, inclined axle, every spoke dished the same way — so
+# one spoke's step to the next is a seamless loop, and the free spoke has left the rim altogether and tumbles on its own.
+RAMP = ".,-~:;=!*#$@"
+K2 = 5.0
+LUM = 8 * math.sqrt(2)
+NAVE_R, NAVE_T = 0.24, 0.12
+RIM_R, RIM_T = 1.0, 0.075
+SPOKE_IN, SPOKE_OUT, DISH, SPOKE_T = 0.36, 0.925, 0.10, 0.034
+SPOKES = 8
+SPOKE_LEN = math.hypot(SPOKE_OUT - SPOKE_IN, DISH)
+PRECESS_POSE = 2.07    # the canonical precession angle, frozen
+INCLINE = 0.80         # the axle's angle off the view axis
+TILT = 0.35
+WHEEL_FRAMES = 15      # per eighth of a turn
+WHEEL_LOOP = 3 * BEAT  # 1.875 s: one spoke to the next, three beats
+FREE_AT = (0.95, -0.95, 0.0)   # where the free spoke hangs, in view space: low right, past the rim
+FREE_TILT = math.radians(24)
+
+
+def _rot(a: float, b: float):
+    """M = Rx(TILT) . Rz(a) . Rx(INCLINE) . Rz(b), row-major."""
+    def mul(p, q):
+        return [[sum(p[i][k] * q[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+
+    def rx(g):
+        c, s = math.cos(g), math.sin(g)
+        return [[1, 0, 0], [0, c, -s], [0, s, c]]
+
+    def rz(g):
+        c, s = math.cos(g), math.sin(g)
+        return [[c, -s, 0], [s, c, 0], [0, 0, 1]]
+    return mul(mul(mul(rx(TILT), rz(a)), rx(INCLINE)), rz(b))
+
+
+def _torus(R, r, n_th, n_ph):
+    for i in range(n_th):
+        th = 2 * math.pi * i / n_th
+        ct, st = math.cos(th), math.sin(th)
+        for j in range(n_ph):
+            ph = 2 * math.pi * (j + 0.5 * (i & 1)) / n_ph
+            cp, sp = math.cos(ph), math.sin(ph)
+            w = R + r * cp
+            yield (w * ct, w * st, r * sp, cp * ct, cp * st, sp)
+
+
+def _basis(d):
+    dx, dy, dz = d
+    if abs(dz) < 0.9:
+        u = (dy, -dx, 0.0)
+    else:
+        u = (0.0, dz, -dy)
+    ul = math.sqrt(sum(v * v for v in u))
+    u = tuple(v / ul for v in u)
+    return u, (dy * u[2] - dz * u[1], dz * u[0] - dx * u[2], dx * u[1] - dy * u[0])
+
+
+def _cylinder(p0, p1, rho, t0, t1, n_len, n_around):
+    d = tuple(b - a for a, b in zip(p0, p1))
+    ln = math.sqrt(sum(v * v for v in d))
+    u, v = _basis(tuple(x / ln for x in d))
+    for i in range(n_len + 1):
+        tt = t0 + (t1 - t0) * i / n_len
+        c = tuple(a + dd * tt for a, dd in zip(p0, d))
+        for j in range(n_around):
+            ph = 2 * math.pi * (j + 0.5 * (i & 1)) / n_around
+            cs, sn = math.cos(ph), math.sin(ph)
+            n = tuple(cs * u[k] + sn * v[k] for k in range(3))
+            yield (c[0] + rho * n[0], c[1] + rho * n[1], c[2] + rho * n[2], *n)
+
+
+class Wheel:
+    """One fixed grid, rendered a frame at a time into {(row, col): (k, layer)}."""
+
+    def __init__(self, cols: int, rows: int, cx: float, cy: float, k1: float, aspect: float = 0.6):
+        self.cols, self.rows, self.cx, self.cy, self.k1, self.aspect = cols, rows, cx, cy, k1, aspect
+        ds = 0.5 * (K2 - 1.1) / k1
+        steps = lambda length, mn: max(mn, math.ceil(length / ds))  # noqa: E731
+        # The tori are sampled in whole multiples of the frame step, two
+        # samples to a step, so a frame turns every sample onto another one:
+        # rim and nave come out identical on every frame and are drawn once.
+        per = 2 * SPOKES * WHEEL_FRAMES
+        geo = list(_torus(RIM_R, RIM_T, per * max(1, math.ceil(steps(2 * math.pi * 1.1, 64) / per)),
+                          steps(2 * math.pi * RIM_T, 10)))
+        geo += list(_torus(NAVE_R, NAVE_T, per, steps(2 * math.pi * NAVE_T, 12)))
+        n_len, n_ar = steps(SPOKE_LEN * 1.2, 10), steps(2 * math.pi * SPOKE_T, 8)
+        for k in range(SPOKES):
+            a = 2 * math.pi * k / SPOKES
+            ca, sa = math.cos(a), math.sin(a)
+            geo += list(_cylinder((SPOKE_IN * ca, SPOKE_IN * sa, DISH), (SPOKE_OUT * ca, SPOKE_OUT * sa, 0.0),
+                                  SPOKE_T, -0.16, 1.03, n_len, n_ar))
+        self.geo = geo
+        self.free_tpl = [(s, math.cos(2 * math.pi * (j + 0.5 * (i & 1)) / n_ar),
+                          math.sin(2 * math.pi * (j + 0.5 * (i & 1)) / n_ar))
+                         for i in range(n_len + 1) for j in range(n_ar)
+                         for s in [(i / n_len - 0.5) * SPOKE_LEN]]
+
+    def render(self, phase: float) -> dict:
+        """phase in [0, 1): one loop — an eighth of a turn of the wheel, a half
+        turn of the free spoke, one breath of its drift."""
+        m = _rot(PRECESS_POSE, phase * 2 * math.pi / SPOKES)
+        lx, ly, lz = 0.0, math.sqrt(0.5), -math.sqrt(0.5)   # donut.c's light: up and toward the viewer
+        q = [sum(m[r][c] * (lx, ly, lz)[r] for r in range(3)) * LUM for c in range(3)]
+        zb, out = {}, {}
+        ky = self.k1 * self.aspect
+
+        def put(x, y, z, k, layer):
+            ooz = 1 / z
+            sx = self.cx + self.k1 * x * ooz
+            sy = self.cy - ky * y * ooz
+            if not (0 <= sx < self.cols and 0 <= sy < self.rows):
+                return
+            cell = (int(sy), int(sx))
+            if ooz > zb.get(cell, 0):
+                zb[cell] = ooz
+                out[cell] = (max(0, min(11, int(k))), layer)
+
+        for px, py, pz, nx, ny, nz in self.geo:
+            x = m[0][0] * px + m[0][1] * py + m[0][2] * pz
+            y = m[1][0] * px + m[1][1] * py + m[1][2] * pz
+            z = m[2][0] * px + m[2][1] * py + m[2][2] * pz + K2
+            k = q[0] * nx + q[1] * ny + q[2] * nz
+            put(x, y, z, k, "dim" if k < 6 else "mid" if k < 9 else "bright")
+
+        # The free spoke: posed in view space, so the wheel's turning never
+        # carries it. It tumbles end over end (a half turn per loop returns it
+        # to the same silhouette) and breathes a little toward the rim.
+        psi = phase * math.pi
+        drift = 0.05 * math.sin(2 * math.pi * phase)
+        mx, my, mz = FREE_AT[0] + drift, FREE_AT[1] - drift * 0.4, FREE_AT[2]
+        cb, sb = math.cos(FREE_TILT), math.sin(FREE_TILT)
+        d = (math.cos(psi), math.sin(psi) * cb, math.sin(psi) * sb)
+        u, v = _basis(d)
+        for s, c, sn in self.free_tpl:
+            n = tuple(c * u[i] + sn * v[i] for i in range(3))
+            x = mx + s * d[0] + SPOKE_T * n[0]
+            y = my + s * d[1] + SPOKE_T * n[1]
+            z = mz + s * d[2] + SPOKE_T * n[2] + K2
+            k = (lx * n[0] + ly * n[1] + lz * n[2]) * LUM + 2
+            put(x, y, z, k, "free")
+        return out
+
+
+def _cell_glyphs(cw: float, ch: float, size: float) -> None:
+    """The ramp, outlined once and baked into cell units, so a placed glyph
+    is just <use href="#rk" x="col" y="row"/> inside a group scaled to the
+    cell."""
+    tt = load("machine")[0]
+    gs = tt.getGlyphSet()
+    cmap = tt.getBestCmap()
+    s = size / load("machine")[2]
+    base = 0.5 + cap_height("machine", size) / 2 / ch
+    for k, c in enumerate(RAMP):
+        pen = SVGPathPen(gs, ntos=lambda v: f"{v:.3g}")
+        gs[cmap[ord(c)]].draw(TransformPen(pen, (s / cw, 0, 0, -s / ch, 0, base)))
+        _atlas[f"r{k}"] = f'<path id="r{k}" d="{pen.getCommands()}"/>'
+
+
+def wheel_svg(t: dict, x0: float, y0: float, cols: int, rows: int, motion: bool, clip: float) -> list[str]:
+    """Every frame of the loop, diffed: a cell that holds the same glyph in
+    the same ink on every frame is drawn once, underneath; each frame carries
+    only what turns. The first frame is the rest pose."""
+    cw, ch = 12, 20
+    _cell_glyphs(cw, ch, 20)
+    wh = Wheel(cols, rows, cx=cols * 0.5, cy=rows * 0.44, k1=rows * 0.5 * K2 / 0.6 / 1.1 * 0.9)
+    frames = [wh.render(i / WHEEL_FRAMES) for i in range(WHEEL_FRAMES if motion else 1)]
+    cells = set().union(*frames)
+    steady = {c: frames[0][c] for c in cells if all(f.get(c) == frames[0].get(c) for f in frames)}
+    ink = {"dim": t["faint"], "mid": t["dim"], "bright": t["ink"], "free": t["free"]}
+
+    def group(cellmap, cls=""):
+        # ink, then row: a row is one translate, a cell one short <use>
+        by = {}
+        for (r, c), (k, layer) in sorted(cellmap.items()):
+            by.setdefault(layer, {}).setdefault(r, []).append(f'<use href="#r{k}" x="{c}"/>')
+        c_ = f' class="{cls}"' if cls else ""
+        return (f'<g{c_}>' + "".join(
+            f'<g fill="{ink[ly]}">' + "".join(f'<g transform="translate(0 {r})">{"".join(u)}</g>'
+                                            for r, u in rows_.items()) + "</g>"
+            for ly, rows_ in by.items()) + "</g>")
+
+    _atlas["wclip"] = f'<clipPath id="wclip"><rect width="{W}" height="{clip}"/></clipPath>'
+    out = [f'<g clip-path="url(#wclip)"><g transform="translate({x0} {y0}) scale({cw} {ch})">', group(steady)]
+    for i, f in enumerate(frames):
+        moving = {c: v for c, v in f.items() if c not in steady}
+        out.append(group(moving, f"wf wf{i}" if motion else ""))
+    out.append("</g></g>")
     return out
 
 
-def edge(t: dict, w: int, h: int) -> str:
-    return (f'<rect x="1.25" y="1.25" width="{w - 2.5}" height="{h - 2.5}" rx="16" '
-            f'stroke="{t["stone"]}" stroke-width="2.5"/>')
-
-
-def lamp(t: dict, cx, cy, cls: str = "", lit: bool = True, hue: str = "live") -> str:
-    """A neon lamp in its socket. r 15 / 8: a lamp has to read on a 390 px
-    phone, where the panel is a third size."""
-    op = "" if lit else ' opacity="0"'
-    c = f' class="{cls}"' if cls else ""
-    return (f'<circle cx="{cx}" cy="{cy}" r="15" fill="{t["deep"]}" stroke="{t["line"]}" stroke-width="2.5"/>'
-            f'<circle{c} cx="{cx}" cy="{cy}" r="8" fill="{t[hue]}" filter="url(#glow)"{op}/>')
-
-
-def node(t: dict, x, y, w, h, hue: str, text: str | None = None, lines=None) -> str:
-    """A stage node: ink ground, its stage hue as an outline, and its name
-    printed in paper — so the hue is never the only thing saying it."""
-    out = [f'<rect x="{x + 1.5}" y="{y + 1.5}" width="{w - 3}" height="{h - 3}" rx="10" '
-           f'fill="{t["raised"]}" stroke="{t[hue]}" stroke-width="3"/>']
-    lines = lines or ([text] if text else [])
-    ch = cap_height("machine-bold", 31)
-    lead = 38
-    top = y + h / 2 - (ch + lead * (len(lines) - 1)) / 2 + ch
-    for i, ln in enumerate(lines):
-        out.append(label("machine-bold", ln, 31, x + 20, top + i * lead, t["paper"], 0.06, fit=w - 32)[0])
-    return "".join(out)
-
-
-def chip(t: dict, x, y, text: str) -> tuple[str, float]:
-    w = measure("human-regular", text, 32) + 40
-    ch = cap_height("human-regular", 32)
-    return (f'<rect x="{x + 1.25}" y="{y + 1.25}" width="{w - 2.5:.1f}" height="49.5" rx="10" fill="{t["deep"]}" '
-            f'stroke="{t["line"]}" stroke-width="2.5"/>'
-            + label("human-regular", text, 32, x + 20, y + 26 + ch / 2, t["paper"])[0], w)
-
-
-def wire(t: dict, *pts) -> str:
-    d = "M" + "L".join(f"{x} {y}" for x, y in pts)
-    return f'<path d="{d}" stroke="{t["stone"]}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>'
-
-
-def enso(t: dict, cx, cy, r, start, sweep, width) -> str:
-    """One brush stroke of ink: an open circle, roughened, never animated."""
-    a0, a1 = math.radians(start), math.radians(start + sweep)
-    x0, y0 = cx + r * math.cos(a0), cy + r * math.sin(a0)
-    x1, y1 = cx + r * math.cos(a1), cy + r * math.sin(a1)
-    big = 1 if sweep > 180 else 0
-    return (f'<path d="M{x0:.1f} {y0:.1f}A{r} {r} 0 {big} 1 {x1:.1f} {y1:.1f}" stroke="{t["line"]}" '
-            f'stroke-width="{width}" stroke-linecap="round" filter="url(#brush)"/>')
+def wheel_css() -> str:
+    step = WHEEL_LOOP / WHEEL_FRAMES
+    show = 100 / WHEEL_FRAMES
+    rules = [f".wf{{opacity:0;animation:wf {WHEEL_LOOP:g}s steps(1,end) infinite}}.wf0{{opacity:1}}",
+             f"@keyframes wf{{0%{{opacity:1}}{show:.4f}%,100%{{opacity:0}}}}"]
+    rules += [f".wf{i}{{animation-delay:{step * i:.4f}s}}" for i in range(1, WHEEL_FRAMES)]
+    return "".join(rules)
 
 
 # -------------------------------------------------------------------- header
 
-HEADER_W, HEADER_H = 1100, 548
-ROWS = (  # key, what is current
-    ("NOW", "Innovation developer at Quokka"),
-    ("BUILD", "LLM pipelines, end to end"),
-    ("DRUMS", "Seventeen years, playing and recording"),
+HEADER_ROWS = 15
+HEADER_H = HEADER_ROWS * ROW
+LINES = (  # tag, kind, what is current
+    ("now", "now", "Innovation developer at Quokka"),
+    ("build", "plain", "LLM pipelines, end to end"),
+    ("drums", "plain", "Seventeen years, playing and recording"),
 )
 
 
 def header(t: dict, motion: bool = True) -> str:
     _atlas.clear()
-    out = scroll(t, HEADER_W, HEADER_H, blobs=((880, 120, 300, 170), (240, 500, 400, 120), (640, 330, 220, 90)))
+    out = panel(t, HEADER_H)
     add = out.append
-    add(enso(t, 958, 150, 104, 130, 300, 22))
 
-    svg_, w = label("human-bold", "Daniel Nilsson", 100, 56, 146, t["paper"], -0.01, fit=780)
-    add(svg_)
-    add(label("human-regular", "LLM engineering · full-stack · Göteborg", 40, 58, 262, t["stone"], fit=780)[0])
+    # The wheel, top right, cropped by the panel edge and stopped by the rule.
+    out += wheel_svg(t, W - 60 * 12 + 60, -40, 60, 30, motion, clip=12 * ROW - 24)
 
-    # The tube under the name: the one neon line on the scroll, lit because the
-    # person is. The current is a short bright run that travels it. The strike
-    # flicker starts lit, so a viewer that freezes the first frame still shows
-    # every tube on.
-    tube = f"M60 190H{56 + w:.1f}"
-    add(f'<g class="lit"><path d="{tube}" stroke="{t["live"]}" stroke-width="7" stroke-linecap="round" '
-        f'filter="url(#glow)"/></g>')
-    run = 90
-    add(f'<path class="cur" d="{tube}" stroke="#FFD9F4" stroke-width="3" stroke-linecap="round" '
-        f'stroke-dasharray="{run} {w + 2 * run:.0f}" opacity="0"/>')
+    add(label("machine", "~/danneftw1", 31, PAD, baseline(1), t["faint"])[0])
+    x = PAD + measure("machine", "~/danneftw1", 31) + 24
+    s_, w_ = tag(t, x, 1, "göteborg")
+    add(s_)
+    add(tag(t, x + w_ + 12, 1, t["name"])[0])
 
-    ch = cap_height("machine-bold", 31)
-    for i, (key, what) in enumerate(ROWS):
-        base = 376 + 66 * i
-        mid = base - ch / 2
-        cls = "lit breathe" if key == "NOW" else "lit"
-        add(lamp(t, 76, round(mid, 1), cls))
-        add(label("machine-bold", key, 31, 112, base, t["stone"], 0.08, fit=150)[0])
-        add(label("human-regular", what, 38, 262, base + 1, t["paper"], fit=780)[0])
-    add(edge(t, HEADER_W, HEADER_H))
+    add(label("display", "Daniel", 136, PAD - 6, 7 * ROW - 66, t["ink"], -0.03, fit=620)[0])
+    add(label("display", "Nilsson", 136, PAD - 6, 10 * ROW - 34, t["ink"], -0.03, fit=620)[0])
 
-    trip = 2 * BAR
-    css = f"""
-    .lit{{animation:strike {secs(T_BOOT)} steps(1,end)}}
-    @keyframes strike{{0%,15%{{opacity:1}}25%{{opacity:.2}}40%{{opacity:1}}50%{{opacity:.35}}65%,100%{{opacity:1}}}}
-    .breathe{{animation:strike {secs(T_BOOT)} steps(1,end),breathe {secs(trip)} ease-in-out {secs(T_BOOT)} infinite}}
-    @keyframes breathe{{0%,100%{{opacity:1}}50%{{opacity:.5}}}}
-    .cur{{animation:cur {secs(trip)} linear {secs(T_BOOT)} infinite}}
-    @keyframes cur{{0%{{opacity:1;stroke-dashoffset:{run}}}100%{{opacity:1;stroke-dashoffset:{-w - run:.0f}}}}}
-    """
-    return svg(HEADER_W, HEADER_H, "Daniel Nilsson — LLM engineering, full-stack, Göteborg",
-               ALT["header"], css if motion else "", out)
+    lede = "LLM engineering, full-stack."
+    add(label("human", lede, 32, PAD, baseline(10.5, "human", 32), t["dim"])[0])
+    cx = PAD + measure("human", lede, 32) + 10
+    # The cursor: one inverse cell, blinking on the beat. Its rest pose is lit.
+    add(f'<rect class="cur" x="{cx:.1f}" y="{10.5 * ROW + 6}" width="18" height="{ROW - 12}" fill="{t["ink"]}"/>')
+
+    add(rule(t, 12 * ROW - 24))
+    for i, (key, kind, text) in enumerate(LINES):
+        row = 12 + i - 0.5 + 0.25
+        add(tag(t, PAD, row, key, kind)[0])
+        add(label("machine", text, 32, PAD + 168, baseline(row, "machine", 32), t["ink"], fit=W - PAD - 168 - PAD)[0])
+
+    # Scanned in row by row behind the title: a void sheet that steps down off
+    # the panel, one text row per step. Its rest pose is already gone.
+    if motion:
+        add(f'<rect class="scan" y="{ROW * 2}" width="{W}" height="{HEADER_H}" fill="{t["void"]}"/>')
+    add(edge(t, HEADER_H))
+
+    css = ""
+    if motion:
+        rows = HEADER_ROWS - 2
+        css = (wheel_css()
+               + f".scan{{transform:translateY({HEADER_H}px);animation:scan {secs(rows * S32)} steps({rows},end) "
+               f"{secs(S16)} both}}@keyframes scan{{from{{transform:translateY(0)}}to{{transform:translateY({HEADER_H}px)}}}}"
+               f".cur{{animation:cur {secs(BEAT)} steps(1,end) infinite}}"
+               "@keyframes cur{0%{opacity:1}50%,100%{opacity:0}}")
+    return svg(W, HEADER_H, "Daniel Nilsson", ALT["header"], css, out)
 
 
 # ------------------------------------------------------------------ pipeline
 
-PIPE_W, PIPE_H = 1100, 628
-LOOP = 96  # sixteenths: six bars, fifteen seconds
-
-# When each lamp is lit, in sixteenths [start, end). Pass A is a call whose
-# third model answer fails the filter and is retried; pass B is clean and
-# ends with the traces sending the change back to the prompt.
-STEPS = {
-    "req": [(0, 2), (48, 50)],
-    "p1": [(2, 4), (50, 52), (90, 96)], "p2": [(4, 6), (52, 54)], "p3": [(6, 8), (54, 56)],
-    "fo": [(8, 10), (56, 58)],
-    "mA": [(10, 16), (58, 64)], "mB": [(10, 16), (58, 64)], "mC": [(10, 16), (26, 30), (58, 64)],
-    "fi": [(16, 18), (30, 32), (64, 66)],
-    "flt": [(18, 22), (32, 34), (66, 68)],
-    "rty": [(22, 26)],
-    "dn": [(34, 36), (68, 70)],
-    "out": [(36, 40), (70, 74)],
-    "srv": [(40, 44), (74, 78)],
-    "trc": [(42, 48), (76, 82)],
-    "it1": [(82, 86)], "it2": [(86, 90)],
-}
-REST = {"fo", "mA", "mB", "mC"}  # the still: a call fanned out to three models
-
-
-def keyframes(name: str, spans: list[tuple[int, int]]) -> str:
-    on = [False] * LOOP
-    for a, b in spans:
-        assert 0 <= a < b <= LOOP and b - a >= 1, f"{name}: bad span {a}-{b}"
-        for s in range(a, b):
-            on[s] = True
-    frames, prev = [], None
-    for s in range(LOOP):
-        if on[s] != prev:
-            frames.append(f"{100 * s / LOOP:.4g}%{{opacity:{1 if on[s] else 0}}}")
-            prev = on[s]
-    frames.append(f"100%{{opacity:{1 if on[-1] else 0}}}")
-    return f"@keyframes k{name}{{{''.join(frames)}}}.L-{name}{{animation-name:k{name}}}"
+# One request is one bar: sixteen sixteenths, one channel per stage. A hit is
+# a ramp glyph; the ramp is its weight. Every hit below is a stage the real
+# pipeline runs — nothing is decoration.
+CHANNELS = (
+    ("prompt", {0: 11, 1: 8}),                              # a multi-stage prompt: two stages
+    ("model · a", {3: 11, 6: 4}),                           # three parallel calls fire as a chord...
+    ("model · b", {3: 10, 6: 4, 9: 10, 11: 4}),             # ...b is sent back and fires again
+    ("model · c", {3: 9, 6: 4}),
+    ("filter", {7: 9, 12: 9}),                              # the content filter, twice
+    ("retry", {8: 11}),                                     # one call back
+    ("output", {13: 11}),                                   # structured output, served
+    ("trace", {**{i: 1 for i in range(16)}, 14: 9, 15: 11}),  # traces tick every step; eval, iterate
+)
+PIPE_ROWS = 13
+PIPE_H = PIPE_ROWS * ROW
+STEP_X0 = 330
+STEP_W = (W - PAD - STEP_X0) / 16
 
 
 def pipeline(t: dict, motion: bool = True) -> str:
     _atlas.clear()
-    out = scroll(t, PIPE_W, PIPE_H, blobs=((300, 120, 320, 120), (860, 520, 360, 120)))
+    out = panel(t, PIPE_H)
     add = out.append
-    boxes: list[tuple[str, float, float, float, float]] = []
 
-    def text(s, x, y, anchor="start"):
-        svg_, w = label("machine-regular", s, 31, x, y, t["stone"], 0.08, anchor=anchor)
-        x0 = {"start": x, "middle": x - w / 2, "end": x - w}[anchor]
-        boxes.append((s, x0, y - cap_height("machine-regular", 31), x0 + w, y))
-        add(svg_)
+    add(label("machine", "one request, one bar", 31, PAD, baseline(1), t["faint"])[0])
+    add(label("machine", f"{BPM} bpm", 31, W - PAD, baseline(1), t["faint"], anchor="end")[0])
+    # the ruler: beats bold, sixteenths faint
+    for s in range(16):
+        cx = STEP_X0 + (s + 0.5) * STEP_W
+        txt, ink = (str(s // 4 + 1), t["ink"]) if s % 4 == 0 else (".", t["faint"])
+        add(label("machine-bold", txt, 31, cx, baseline(2.5), ink, anchor="middle")[0])
+    add(rule(t, 3.25 * ROW, PAD, W - PAD))
 
-    def box(nm, x, y, w, h):
-        boxes.append((nm, x, y, x + w, y + h))
+    for i, (name, hits) in enumerate(CHANNELS):
+        row = 3.5 + i
+        add(label("machine", name, 31, PAD, baseline(row), t["dim"])[0])
+        for s in range(16):
+            cx = STEP_X0 + (s + 0.5) * STEP_W
+            k = hits.get(s)
+            if k is None:
+                if s % 4 == 0:
+                    add(label("machine", "|", 31, cx, baseline(row), t["grid"], anchor="middle")[0])
+                continue
+            ink = t["ink"] if k >= 9 else t["dim"] if k >= 6 else t["faint"]
+            add(label("machine-bold", RAMP[k], 34, cx, baseline(row, "machine-bold", 34), ink, anchor="middle")[0])
+    add(rule(t, 11.75 * ROW, PAD, W - PAD))
+    add(label("machine", "three calls, one chord · one sent back · all traced", 31,
+              PAD, baseline(12), t["faint"], fit=W - 2 * PAD)[0])
 
-    # Wires first, so every node and lamp sits on top of them.
-    add(wire(t, (118, 170), (170, 170)))                                  # request -> prompt
-    add(wire(t, (400, 170), (470, 170)))                                  # prompt -> split
-    add(wire(t, (470, 110), (470, 230)))
-    for y in (110, 170, 230):
-        add(wire(t, (470, y), (520, y)))                                  # fan-out
-        add(wire(t, (690, y), (740, y)))                                  # fan-in
-    add(wire(t, (740, 110), (740, 230)))
-    add(wire(t, (740, 170), (800, 170)))                                  # -> filter
-    add(wire(t, (900, 210), (900, 262), (605, 262), (605, 252)))          # retry, back into model C
-    add(wire(t, (1000, 210), (1000, 400)))                                # -> structured output
-    add(wire(t, (790, 440), (700, 440)))                                  # -> serve
-    add(wire(t, (520, 440), (470, 440)))                                  # -> traces
-    add(wire(t, (250, 410), (250, 210)))                                  # iterate, back to the prompt
-    for x, y0, y1 in ((300, 470, 520), (610, 470, 520), (917, 496, 520)):
-        add(wire(t, (x, y0), (x, y1)))                                    # runs on the band below
-
-    # Where a request comes in.
-    add(f'<circle cx="96" cy="170" r="22" fill="{t["deep"]}" stroke="{t["stone"]}" stroke-width="4"/>')
-    box("jack", 74, 148, 44, 44)
-    text("REQUEST", 56, 238)
-
-    add(node(t, 170, 130, 230, 80, "model"))
-    box("PROMPT node", 170, 130, 230, 80)
-    text("PROMPT", 170, 112)
-    add(f'<path d="M215 170H355" stroke="{t["ink"]}" stroke-width="4"/>')
-    text("FAN-OUT", 470, 70, "middle")
-    for i, y in enumerate((88, 148, 208)):
-        add(node(t, 520, y, 170, 44, "model", "MODEL"))
-        box(f"model {i}", 520, y, 170, 44)
-    text("FAN-IN", 740, 70, "middle")
-    add(node(t, 800, 130, 244, 80, "model", "FILTER"))
-    box("FILTER", 800, 130, 244, 80)
-    text("RETRY", 760, 306, "middle")
-    add(node(t, 790, 400, 254, 96, "serve", lines=["STRUCTURED", "OUTPUT"]))
-    box("OUTPUT", 790, 400, 254, 96)
-    add(node(t, 520, 410, 180, 60, "serve", "SERVE"))
-    box("SERVE", 520, 410, 180, 60)
-    add(node(t, 130, 410, 340, 60, "model", "TRACES · EVALS"))
-    box("TRACES", 130, 410, 340, 60)
-    text("ITERATE", 272, 330)
-    add(node(t, 56, 520, 584, 64, "cloud", "AZURE · INFRA AS CODE"))
-    box("CLOUD", 56, 520, 584, 64)
-    add(node(t, 656, 520, 388, 64, "ship", "DEPLOY PIPELINE"))
-    box("SHIP", 656, 520, 388, 64)
-
-    lamps = {"req": (144, 170), "p1": (215, 170), "p2": (285, 170), "p3": (355, 170), "fo": (435, 170),
-             "mA": (664, 110), "mB": (664, 170), "mC": (664, 230), "fi": (770, 170), "flt": (1014, 170),
-             "rty": (760, 262), "dn": (1000, 330), "out": (745, 440), "srv": (674, 440), "trc": (495, 440),
-             "it1": (250, 350), "it2": (250, 290)}
-    assert set(lamps) == set(STEPS), "every lamp needs a step row, and every row a lamp"
-    for nm, (cx, cy) in lamps.items():
-        add(lamp(t, cx, cy, f"L L-{nm}", nm in REST))
-    add(edge(t, PIPE_W, PIPE_H))
-
-    # Nothing printed may overlap anything else printed.
-    for i, a in enumerate(boxes):
-        for b in boxes[i + 1:]:
-            if a[1] < b[3] and b[1] < a[3] and a[2] < b[4] and b[2] < a[4]:
-                raise SystemExit(f"pipeline: {a[0]!r} overlaps {b[0]!r}")
-
-    css = (f".L{{animation:{secs(LOOP * S16)} steps(1,end) {secs(T_BOOT)} infinite}}"
-           + "".join(keyframes(nm, spans) for nm, spans in STEPS.items()))
-    return svg(PIPE_W, PIPE_H, "How a request moves through the pipelines I build",
-               ALT["pipeline"], css if motion else "", out)
+    # The playhead: one inverse column, a whole cell wide, walking the bar in
+    # sixteenths. Difference against white inverts whatever it passes in both
+    # themes: void turns ink and ink turns void, so a hit flashes as it plays.
+    if motion:
+        add(f'<rect class="ph" x="{STEP_X0}" y="{3.5 * ROW}" width="{STEP_W:.2f}" height="{8 * ROW}" fill="#fff"/>')
+    add(edge(t, PIPE_H))
+    css = ""
+    if motion:
+        css = (f".ph{{opacity:0;mix-blend-mode:difference;animation:ph {secs(BAR)} steps(16,end) infinite}}"
+               f"@keyframes ph{{from{{opacity:1;transform:translateX(0)}}to{{opacity:1;transform:translateX({16 * STEP_W:.2f}px)}}}}")
+    return svg(W, PIPE_H, "How a request moves", ALT["pipeline"], css, out)
 
 
 # --------------------------------------------------------------------- stack
 
-STACK_W, STACK_H = 1100, 628
 STACK = (
-    ("model", "MODEL", ("Azure OpenAI", "AI Foundry", "MCP servers", "Langfuse")),
-    ("serve", "SERVE", ("TypeScript", "Python · Flask", "React + Vite", "Express", "pnpm monorepo")),
-    ("cloud", "CLOUD", ("App Service", "Cosmos DB", "Key Vault", "Entra External ID (B2C)", "Bicep")),
-    ("ship", "SHIP", ("GitHub Actions", "Claude Code · Cursor", "AI-assisted code review", "PR automation")),
+    ("model", "prompts, parallel calls, traces, evals",
+     ("Azure OpenAI", "AI Foundry", "MCP servers", "Langfuse")),
+    ("serve", "the services the pipelines run in",
+     ("TypeScript", "Python", "Flask", "React + Vite", "Express", "pnpm monorepo")),
+    ("cloud", "Azure underneath, written as code",
+     ("App Service", "Cosmos DB", "Key Vault", "Entra External ID (B2C)", "Bicep")),
+    ("ship", "deploy pipelines, an AI-assisted loop",
+     ("GitHub Actions", "Claude Code", "Cursor", "AI-assisted code review", "PR automation")),
 )
+CHIP_X0 = 250
+
+
+def _chip_rows(tools) -> list[list[tuple[str, float]]]:
+    rows, row, x = [], [], CHIP_X0
+    for tool in tools:
+        w = measure("machine", tool, 31) + 24
+        if row and x + w > W - PAD:
+            rows.append(row)
+            row, x = [], CHIP_X0
+        row.append((tool, w))
+        x += w + 12
+    return rows + [row]
 
 
 def stack(t: dict, motion: bool = False) -> str:
     _atlas.clear()
-    out = scroll(t, STACK_W, STACK_H, blobs=((900, 140, 300, 140), (200, 520, 320, 110)))
-    for r, (hue, name, tools) in enumerate(STACK):
-        y0 = 48 + 144 * r
-        out.append(node(t, 56, y0, 144, 52, hue, name))
-        x, y, lines = 224, y0, 1
-        for tool in tools:
-            w = measure("human-regular", tool, 32) + 40
-            if x + w > 1044:
-                x, y, lines = 224, y + 64, lines + 1
-            assert lines <= 2, f"{name}: the chips need a third line"
-            svg_, w = chip(t, x, y, tool)
-            out.append(svg_)
-            x += w + 14
-    out.append(edge(t, STACK_W, STACK_H))
-    return svg(STACK_W, STACK_H, "Stack, grouped by where each tool acts", ALT["stack"], "", out)
+    layout = [(g, note, _chip_rows(tools)) for g, note, tools in STACK]
+    # a group is its name row, its chip rows, and half a row of air with the
+    # rule through its middle
+    h = int((1 + sum(1 + len(r) for _, _, r in layout) + 0.5 * (len(layout) - 1) + 1) * ROW)
+    out = panel(t, h)
+    add = out.append
+    row = 1.0
+    for i, (group, note, chip_rows) in enumerate(layout):
+        if i:
+            add(rule(t, (row - 0.25) * ROW, PAD, W - PAD))
+        add(label("display", group, 44, PAD - 2, baseline(row, "display", 44), t["ink"], -0.02)[0])
+        add(label("machine", note, 31, CHIP_X0, baseline(row), t["faint"], fit=W - PAD - CHIP_X0)[0])
+        for chips in chip_rows:
+            row += 1
+            x = CHIP_X0
+            for tool, w in chips:
+                y = row * ROW + (ROW - TAG_H) / 2
+                add(f'<rect x="{x + 1.25:.1f}" y="{y + 1.25:.1f}" width="{w - 2.5:.1f}" height="{TAG_H - 2.5}" '
+                    f'fill="{t["cell"]}" stroke="{t["wire"]}" stroke-width="2.5"/>')
+                add(label("machine", tool, 31, x + 12, baseline(row), t["ink"])[0])
+                x += w + 12
+        row += 1.5
+    add(edge(t, h))
+    return svg(W, h, "Stack, grouped by where each tool acts", ALT["stack"], "", out)
 
 
 # -------------------------------------------------------------------- record
 
-REC_W, REC_H = 1100, 636
-RECORD = (  # current (lit), title, subtitle, years
-    (True, "Innovation developer · Quokka", "AI-POWERED PRODUCTS, END TO END", None),
-    (True, "Side projects", "HOBBY, MOSTLY PRIVATE", None),
-    (True, "Drums · seventeen years", f"PLAYING, RECORDING · SINCE ~{DRUMS_FROM}", None),
-    (False, "Some C", "PUBLIC REPO", "2025"),
-    (False, "IT-högskolan", "AI AND ML COURSEWORK", "2022–2024"),
+RECORD = (  # when, tag, tag kind, what, detail
+    ("now", "now", "now", "Quokka", "innovation developer"),
+    ("now", "now", "now", "Side projects", "hobby, mostly private"),
+    ("now", "free", "free", "Neon Sumi", "open source"),
+    (f"~{DRUMS_FROM}", "now", "now", "Drums", "playing and recording"),
+    ("2025", "ended", "ended", "Some C", "public repo"),
+    ("2022–2024", "ended", "ended", "IT-högskolan", "AI and ML coursework"),
 )
+REC_ROWS = len(RECORD) + 2
+REC_H = REC_ROWS * ROW
 
 
 def record(t: dict, motion: bool = False) -> str:
     _atlas.clear()
-    out = scroll(t, REC_W, REC_H, blobs=((260, 140, 320, 150), (880, 540, 340, 110)))
+    out = panel(t, REC_H)
     add = out.append
-    for i, (lit, title, sub, years) in enumerate(RECORD):
-        y0, x0, w = 56 + 110 * i, 56, 988
-        if lit:
-            add(f'<rect x="{x0 + 1.25}" y="{y0 + 1.25}" width="{w - 2.5}" height="93.5" rx="10" fill="{t["raised"]}" '
-                f'stroke="{t["stone"]}" stroke-width="2.5"/>')
-            add(f'<rect x="{x0 + 20}" y="{y0 + 18}" width="7" height="60" rx="3.5" fill="{t["live"]}" '
-                f'filter="url(#glow)"/>')
-            add(label("human-bold", title, 40, x0 + 52, y0 + 44, t["paper"], fit=700)[0])
-            add(lamp(t, x0 + w - 136, y0 + 48))
-            add(label("machine-bold", "NOW", 34, x0 + w - 32, y0 + 48 + cap_height("machine-bold", 34) / 2,
-                      t["live"], 0.08, anchor="end")[0])
-        else:
-            add(f'<rect x="{x0 + 1.25}" y="{y0 + 1.25}" width="{w - 2.5}" height="93.5" rx="10" '
-                f'stroke="{t["line"]}" stroke-width="2.5"/>')
-            add(label("human-regular", title, 40, x0 + 52, y0 + 44, t["soft"], fit=700)[0])
-            add(label("machine-regular", years, 34, x0 + w - 32, y0 + 58, t["stone"], 0.04, anchor="end")[0])
-        add(label("machine-regular", sub, 31, x0 + 52, y0 + 80, t["stone"], 0.04, fit=700)[0])
-        if "~" in sub:  # the one approximate fact is dashed, never solid
-            pre = sub[:sub.index("~")]
-            a = x0 + 52 + measure("machine-regular", pre, 31, 0.04)
-            b = x0 + 52 + measure("machine-regular", sub, 31, 0.04)
-            add(f'<path d="M{a:.1f} {y0 + 88}H{b:.1f}" stroke="{t["stone"]}" stroke-width="4" stroke-dasharray="10 7"/>')
-    add(edge(t, REC_W, REC_H))
-    return svg(REC_W, REC_H, "Record: what is current, and what ended when", ALT["record"], "", out)
+    for i, (when, key, kind, what, detail) in enumerate(RECORD):
+        row = 1 + i
+        if i:
+            add(rule(t, row * ROW, PAD, W - PAD))
+        ink = t["faint"] if kind == "ended" else t["ink"]
+        add(label("machine", when, 31, PAD, baseline(row), t["faint"])[0])
+        if when.startswith("~"):  # the one approximate fact is dashed, never solid
+            wd = measure("machine", when, 31)
+            add(f'<path d="M{PAD} {baseline(row) + 9:.1f}H{PAD + wd:.1f}" stroke="{t["faint"]}" '
+                f'stroke-width="3" stroke-dasharray="8 6"/>')
+        add(tag(t, 228, row, key, kind)[0])
+        add(label("machine-bold", what, 32, 372, baseline(row, "machine-bold", 32), ink, fit=650 - 372)[0])
+        add(label("machine", detail, 31, 650, baseline(row), t["faint"], fit=W - PAD - 650)[0])
+    add(edge(t, REC_H))
+    return svg(W, REC_H, "Record: what is current, and what ended when", ALT["record"], "", out)
 
 
 # ---------------------------------------------------------------- alt text
@@ -678,33 +769,34 @@ def record(t: dict, motion: bool = False) -> str:
 # Each file's <desc> and the README's alt text are the same string; the check
 # holds them equal, so a reader who cannot see the panel gets every fact on it.
 ALT = {
-    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. Neon on an ink-wash scroll, with three "
-               "lit rows: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, "
+    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. The name in heavy condensed type beside "
+               "a wheel drawn in text characters, turning, with one amber spoke that has broken free of the rim. "
+               "Three lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, "
                "seventeen years, playing and recording."),
-    "pipeline": ("How a request moves: it enters a multi-stage prompt, fans out to three parallel model calls "
-                 "and fans back in, passes a content filter that can send one call back to retry, becomes "
-                 "structured output, is served, and is traced and evaluated before the prompt is iterated. "
-                 "It runs on Azure, written as code, and ships through a deploy pipeline."),
+    "pipeline": ("How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then "
+                 "three parallel model calls fire together as a chord. The content filter sends one call back "
+                 "to retry; it fires again and passes the filter. The result becomes structured output and is "
+                 "served. Traces tick on every step; the bar ends with an eval and a prompt iteration."),
     "stack": "Stack, grouped by where each tool acts. " + " ".join(
-        f"{name.title()}: {' · '.join(tools)}." for _, name, tools in STACK),
-    "record": ("Record. Current, lit in neon: innovation developer at Quokka; side projects, mostly private; "
-               f"drums, seventeen years, since about {DRUMS_FROM}. Ended, in ink: some C, 2025; IT-högskolan, "
-               "AI and ML coursework, 2022–2024."),
+        f"{name.title()}: {' · '.join(tools)}." for name, _, tools in STACK),
+    "record": ("Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly "
+               "private; Neon Sumi, open source, tagged free in amber because it wears its own design; drums, playing and "
+               f"recording since about {DRUMS_FROM}, dashed because the year is approximate. Ended: some C, "
+               "2025; IT-högskolan, AI and ML coursework, 2022–2024."),
 }
 
 
 # --------------------------------------------------------------------- frame
 
 def svg(w: int, h: int, title: str, desc: str, css: str, body: list[str]) -> str:
-    """The frame. An empty `css` means a still: no <style>, and every
-    per-element animation property goes too, so nothing in the file moves —
-    what is left is the base style, which is the rest pose."""
+    """The frame. An empty `css` means a still: no <style>, so nothing in the
+    file moves — what is left is the base style, which is the rest pose.
+    Motion is dropped for anyone who asked their OS for less of it, too."""
     inner = "\n".join(body)
     style = ""
     if css.strip():
+        css += "@media (prefers-reduced-motion:reduce){*{animation:none!important}}"
         style = "<style>" + re.sub(r"\s+", " ", css).strip() + "</style>\n"
-    else:
-        inner = re.sub(r' style="(?:animation-[^";]*;?)+"', "", inner)
     defs = "<defs>" + "".join(v for v in _atlas.values() if v) + "</defs>\n"
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" '
@@ -715,7 +807,7 @@ def svg(w: int, h: int, title: str, desc: str, css: str, body: list[str]) -> str
 
 
 # Every asset the README shows, in page order. A moving panel is written with
-# and without motion. There is one finish, written under both theme names.
+# and without motion, under both theme names.
 MOTION, STILL = True, False
 ASSETS = (
     ("header", header, MOTION),
@@ -724,6 +816,10 @@ ASSETS = (
     ("record", record, STILL),
 )
 MAX_BYTES = 120 * 1024
+# The moving header carries every frame of the wheel's loop. Each frame is
+# diffed against the others, and the rest is rows of one-glyph <use>s, which
+# gzip folds to about a fifth on the wire.
+MAX_BYTES_WHEEL = 160 * 1024
 
 
 def main() -> None:
@@ -742,8 +838,9 @@ def main() -> None:
                 path = out / f"{stem}{suffix}-{theme}.svg"
                 path.write_text(draw(t, motion), encoding="utf-8")
                 size = path.stat().st_size
-                if size > MAX_BYTES:
-                    raise SystemExit(f"{path.name} is {size / 1024:.0f} kB, over the {MAX_BYTES // 1024} kB budget")
+                cap = MAX_BYTES_WHEEL if path.name.startswith("header-") else MAX_BYTES
+                if size > cap:
+                    raise SystemExit(f"{path.name} is {size / 1024:.0f} kB, over the {cap // 1024} kB budget")
                 print(f"  wrote {os.path.relpath(path)}  {size / 1024:.1f} kB")
 
 
