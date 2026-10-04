@@ -27,7 +27,7 @@ The rules the drawing keeps, all of them Tecken's:
     a word;
   * natt first: the dark file is Tecken's night, the light file its day;
   * the weight of the ink is the certainty: the one approximate fact (drums
-    since ~2009) is dashed, and anything undated is not drawn;
+    since ~2009) is dashed, and a start that is not on record is a dash;
   * the phone is the main case: a 390 px phone shows the 1100-unit-wide panel
     at 358 CSS px, so no text is under 31 units.
 
@@ -376,6 +376,7 @@ WHEEL_FRAMES = 15      # per eighth of a turn
 WHEEL_LOOP = 3 * BEAT  # 1.875 s: one spoke to the next, three beats
 FREE_AT = (0.95, -0.95, 0.0)   # where the free spoke hangs, in view space: low right, past the rim
 FREE_TILT = math.radians(24)
+WHEEL_MARGIN = 24      # the free spoke ends this far inside the frame, never on its rule
 
 
 def _rot(a: float, b: float):
@@ -525,6 +526,8 @@ def wheel_svg(t: dict, x0: float, y0: float, cols: int, rows: int, motion: bool,
     wh = Wheel(cols, rows, cx=cols * 0.5, cy=rows * 0.44, k1=rows * 0.5 * K2 / 0.6 / 1.1 * 0.9)
     frames = [wh.render(i / WHEEL_FRAMES) for i in range(WHEEL_FRAMES if motion else 1)]
     cells = set().union(*frames)
+    right = x0 + (max(c for _, c in cells) + 1) * cw
+    assert right <= W - WHEEL_MARGIN, f"the wheel reaches x={right:.0f}, past the {W - WHEEL_MARGIN} the frame leaves it"
     steady = {c: frames[0][c] for c in cells if all(f.get(c) == frames[0].get(c) for f in frames)}
     ink = {"dim": t["faint"], "mid": t["dim"], "bright": t["ink"], "free": t["free"]}
 
@@ -559,13 +562,12 @@ def wheel_css() -> str:
 
 # -------------------------------------------------------------------- header
 
-HEADER_ROWS = 16
+HEADER_ROWS = 14
 HEADER_H = HEADER_ROWS * ROW
+WHEEL_X0 = W - WHEEL_MARGIN - 56 * 12   # the spoke's last cell is column 55 of 60
 LINES = (  # tag, kind, what is current
     ("now", "now", "Innovation developer at Quokka"),
     ("build", "plain", "LLM pipelines, end to end"),
-    ("free", "free", "Neon Sumi, a status line for Claude Code"),
-    ("drums", "plain", "Seventeen years, recorded, never quantized"),
 )
 
 
@@ -574,8 +576,9 @@ def header(t: dict, motion: bool = True) -> str:
     out = panel(t, HEADER_H)
     add = out.append
 
-    # The wheel, top right, cropped by the panel edge and stopped by the rule.
-    out += wheel_svg(t, W - 60 * 12 + 60, -40, 60, 30, motion, clip=12 * ROW - 24)
+    # The wheel, top right, kept whole inside the frame: cropped only at the
+    # top, stopped by the rule below.
+    out += wheel_svg(t, WHEEL_X0, -40, 60, 30, motion, clip=12 * ROW - 24)
 
     add(label("machine", "~/danneftw1", 31, PAD, baseline(1), t["faint"])[0])
     x = PAD + measure("machine", "~/danneftw1", 31) + 24
@@ -586,7 +589,7 @@ def header(t: dict, motion: bool = True) -> str:
     add(label("display", "Daniel", 136, PAD - 6, 7 * ROW - 66, t["ink"], -0.03, fit=620)[0])
     add(label("display", "Nilsson", 136, PAD - 6, 10 * ROW - 34, t["ink"], -0.03, fit=620)[0])
 
-    lede = "Exploratory developer, drummer."
+    lede = "AI engineer, full-stack."
     add(label("human", lede, 32, PAD, baseline(10.5, "human", 32), t["dim"])[0])
     cx = PAD + measure("human", lede, 32) + 10
     # The cursor: one inverse cell, blinking on the beat. Its rest pose is lit.
@@ -642,7 +645,7 @@ def pipeline(t: dict, motion: bool = True) -> str:
     add = out.append
 
     add(label("machine", "one request, one bar", 31, PAD, baseline(1), t["faint"])[0])
-    add(label("machine", f"{BPM} bpm", 31, W - PAD, baseline(1), t["faint"], anchor="end")[0])
+    add(label("machine", "@ fire · : answer · , trace", 31, W - PAD, baseline(1), t["faint"], anchor="end", fit=560)[0])
     # the ruler: beats bold, sixteenths faint
     for s in range(16):
         cx = STEP_X0 + (s + 0.5) * STEP_W
@@ -681,15 +684,15 @@ def pipeline(t: dict, motion: bool = True) -> str:
 
 # --------------------------------------------------------------------- stack
 
+# Eight tools, the ones the work is built on. The whole inventory is plain text
+# in the README's liner notes, where Ctrl-F and a CV parser find it.
 STACK = (
     ("model", "prompts, parallel calls, traces, evals",
-     ("Azure OpenAI", "Microsoft Foundry", "MCP servers", "Langfuse")),
+     ("Azure OpenAI", "Microsoft Foundry", "Langfuse")),
     ("serve", "the services the pipelines run in",
-     ("TypeScript", "Python", "Flask", "React + Vite", "Express", "pnpm monorepo")),
-    ("cloud", "Azure underneath, written as code",
-     ("App Service", "Cosmos DB", "Key Vault", "Entra External ID (B2C)", "Bicep")),
-    ("ship", "deploy pipelines, an AI-assisted loop",
-     ("GitHub Actions", "Claude Code", "Cursor", "AI-assisted code review", "PR automation")),
+     ("TypeScript", "Python")),
+    ("ship", "Azure written as code, an AI-assisted loop",
+     ("Bicep", "GitHub Actions", "Claude Code")),
 )
 CHIP_X0 = 250
 
@@ -736,16 +739,13 @@ def stack(t: dict, motion: bool = False) -> str:
 
 # -------------------------------------------------------------------- record
 
-KEYBOARDS_FROM = 2012
-RECORD = (  # when, tag, tag kind, what, detail
-    ("now", "now", "now", "Quokka", "innovation developer"),
-    ("now", "now", "now", "Side projects", "hobby, mostly private"),
-    ("now", "free", "free", "Neon Sumi", "open source"),
+RECORD = (  # since, tag, tag kind, what, detail — "—" is a start that is not on record
+    ("—", "now", "now", "Quokka", "innovation developer"),
+    ("—", "free", "free", "Neon Sumi", "hobby, open source"),
     (f"~{DRUMS_FROM}", "now", "now", "Drums", "playing and recording"),
-    (f"{KEYBOARDS_FROM}", "now", "now", "Keyboards", "building and modding"),
-    ("2022–2024", "ended", "ended", "IT-högskolan", "AI and ML programme"),
+    ("2022–2024", "ended", "ended", "IT-högskolan", "AI and ML coursework"),
 )
-REC_ROWS = len(RECORD) + 2
+REC_ROWS = len(RECORD) + 3
 REC_H = REC_ROWS * ROW
 
 
@@ -753,10 +753,11 @@ def record(t: dict, motion: bool = False) -> str:
     _atlas.clear()
     out = panel(t, REC_H)
     add = out.append
+    for x, name in ((PAD, "since"), (228, "state"), (372, "what"), (650, "detail")):
+        add(label("machine", name, 31, x, baseline(1), t["faint"])[0])
     for i, (when, key, kind, what, detail) in enumerate(RECORD):
-        row = 1 + i
-        if i:
-            add(rule(t, row * ROW, PAD, W - PAD))
+        row = 2 + i
+        add(rule(t, row * ROW, PAD, W - PAD))
         ink = t["faint"] if kind == "ended" else t["ink"]
         add(label("machine", when, 31, PAD, baseline(row), t["faint"])[0])
         if when.startswith("~"):  # the one approximate fact is dashed, never solid
@@ -775,21 +776,20 @@ def record(t: dict, motion: bool = False) -> str:
 # Each file's <desc> and the README's alt text are the same string; the check
 # holds them equal, so a reader who cannot see the panel gets every fact on it.
 ALT = {
-    "header": ("Daniel Nilsson — exploratory developer and drummer, Göteborg. The name in heavy condensed type "
-               "beside a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free "
-               "of the rim. Four lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; "
-               "free, Neon Sumi, a status line for Claude Code; drums, seventeen years, recorded, never quantized."),
+    "header": ("Daniel Nilsson — AI engineer, full-stack, Göteborg. The name in heavy condensed type beside "
+               "a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free of the rim. "
+               "Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end."),
     "pipeline": ("How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then "
                  "three parallel model calls fire together as a chord. The content filter sends one call back "
                  "to retry; it fires again and passes the filter. The result becomes structured output and is "
-                 "served. Traces tick on every step; the bar ends with an eval and a prompt iteration."),
+                 "served. Traces tick on every step; the bar ends with an eval and a prompt iteration. "
+                 "Legend: a heavy glyph is a stage firing, a colon is its answer coming back, a comma is a trace tick."),
     "stack": "Stack, grouped by where each tool acts. " + " ".join(
         f"{name.title()}: {' · '.join(tools)}." for name, _, tools in STACK),
-    "record": ("Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly private; "
-               "Neon Sumi, open source, tagged free in neon magenta because it wears its own design; "
-               f"drums, playing and recording since about {DRUMS_FROM}, dashed because the year is approximate; "
-               f"keyboards, building and modding since {KEYBOARDS_FROM}. Ended: IT-högskolan, AI and ML programme, "
-               "2022–2024."),
+    "record": ("Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, "
+               "start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in neon magenta because it "
+               f"wears its own design; drums, playing and recording since about {DRUMS_FROM}, dashed because the year is "
+               "approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024."),
 }
 
 

@@ -119,7 +119,7 @@ if (existsSync(join(ROOT, "assets", "stack-light.svg"))) {
 // 5c. Facts. The page may only state what Daniel's own README states: the
 //     numbers below are its dates (and the check's own widths), links go to his
 //     repos or to this repo's files, and the H2s are plain.
-const ALLOWED_NUMBERS = new Set(["2009", "2012", "2022", "2024", "2", "390", "430", "896"]);
+const ALLOWED_NUMBERS = new Set(["2009", "2022", "2024", "2025", "2", "390", "430", "896"]);
 const svgWords = built.map((f) => readFileSync(join(ROOT, "assets", f), "utf8").match(/<title[\s\S]*?<\/desc>/)[0]).join(" ");
 const prose = readme.replaceAll('width="100%"', "");
 const numbers = [...(prose.replace(/https?:\/\/\S+/g, "") + svgWords).matchAll(/\d+/g)].map((m) => m[0]);

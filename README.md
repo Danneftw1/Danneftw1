@@ -3,20 +3,13 @@
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/header-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-  <img alt="Daniel Nilsson — exploratory developer and drummer, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free of the rim. Four lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; free, Neon Sumi, a status line for Claude Code; drums, seventeen years, recorded, never quantized." src="assets/header-light.svg" width="100%">
+  <img alt="Daniel Nilsson — AI engineer, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free of the rim. Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end." src="assets/header-light.svg" width="100%">
 </picture>
 
-Exploratory developer in Gothenburg. At **Quokka** I build AI-powered products end to end:
-multi-stage prompts, parallel model calls, the TypeScript and Python services that run them and
-the Azure infrastructure underneath. On my own time I build
-[Neon Sumi](https://github.com/Danneftw1/neon-sumi), an open-source status line for Claude
-Code. I have played drums for seventeen years and record them multi-mic,
-never quantized: the hits land where they land.
-
-The page is drawn in Tecken, the character-cell design system my project hub runs on, cut
-heavier: one face, square cells, the inverse cell for what is current. Its one colour is
-Neon Sumi's magenta, kept for the one project that broke free of the hub and wears its own
-design.
+I build LLM pipelines and the products around them: multi-stage prompts, parallel model calls,
+the TypeScript and Python services that run them, and the Azure infrastructure underneath.
+Innovation developer at **Quokka** in Gothenburg, building AI-powered products end to end.
+I have played and recorded drums for seventeen years.
 
 ## How I build
 
@@ -25,13 +18,8 @@ design.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/pipeline-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/pipeline-light.svg">
-  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration." src="assets/pipeline-light.svg" width="100%">
+  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration. Legend: a heavy glyph is a stage firing, a colon is its answer coming back, a comma is a trace tick." src="assets/pipeline-light.svg" width="100%">
 </picture>
-
-- Multi-stage prompt design with structured output
-- Parallel model calls, fan-out and fan-in, with content-filter and retry handling
-- Traces, evals and prompt iteration
-- Infrastructure as code and deploy pipelines
 
 ## Stack
 
@@ -40,16 +28,8 @@ design.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/stack-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/stack-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/stack-light.svg">
-  <img alt="Stack, grouped by where each tool acts. Model: Azure OpenAI · Microsoft Foundry · MCP servers · Langfuse. Serve: TypeScript · Python · Flask · React + Vite · Express · pnpm monorepo. Cloud: App Service · Cosmos DB · Key Vault · Entra External ID (B2C) · Bicep. Ship: GitHub Actions · Claude Code · Cursor · AI-assisted code review · PR automation." src="assets/stack-light.svg" width="100%">
+  <img alt="Stack, grouped by where each tool acts. Model: Azure OpenAI · Microsoft Foundry · Langfuse. Serve: TypeScript · Python. Ship: Bicep · GitHub Actions · Claude Code." src="assets/stack-light.svg" width="100%">
 </picture>
-
-**Model** — prompts, parallel model calls, traces and evals. Azure OpenAI · Microsoft Foundry · MCP servers · Langfuse
-
-**Serve** — the services and frontends the pipelines run in. TypeScript · Python/Flask · React + Vite · Express · pnpm monorepo
-
-**Cloud** — Azure underneath, written as code. App Service · Cosmos DB · Key Vault · Entra External ID (B2C) · Bicep
-
-**Ship** — deploy pipelines and an AI-assisted dev loop. GitHub Actions · Claude Code / Cursor workflows · AI-assisted code review and PR automation
 
 ## Record
 
@@ -58,35 +38,24 @@ design.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly private; Neon Sumi, open source, tagged free in neon magenta because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate; keyboards, building and modding since 2012. Ended: IT-högskolan, AI and ML programme, 2022–2024." src="assets/record-light.svg" width="100%">
+  <img alt="Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in neon magenta because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
 </picture>
 
-<sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown.</sub>
-
-- **Innovation developer, Quokka** — Gothenburg, now
-- **Side projects** — now, hobby, mostly private
-- **Neon Sumi** — a status line for Claude Code, open source, now
-- **Drums** — playing and recording since about 2009, seventeen years
-- **Keyboards** — building and modding mechanical keyboards since 2012
-- **IT-högskolan** — AI and machine learning programme, 2022–2024, archived public coursework
+<sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown; a dash is a start that is not on record.</sub>
 
 ## Now
 
-- **[Neon Sumi](https://github.com/Danneftw1/neon-sumi)** — a status line for Claude Code that shows
-  context, limits, the PR and the ports that are up, with matching themes for Ghostty and Obsidian.
-  Free and open source.
-- **Recording pipeline** — from behind the kit to a finished video, multi-mic audio and multi-angle video,
-  with as little manual work in between as possible. Private.
-- **DrumbBrain** — reads my own drum recordings into a profile of how I play: what I lean on and what is
-  left to explore. Local-first. Research phase, no code yet.
+- **[Neon Sumi](https://github.com/Danneftw1/neon-sumi)** — a status line for Claude Code that
+  shows context, limits, the PR and the ports that are up. Free and open source.
 - **Claude Code setup** — hooks, subagents, slash commands and MCP config, plus a plain-text ledger. Private.
 - **Genealogy site** — two family lines; every fact is graded by how well it is sourced, and the grade
   decides how it is drawn: solid ink or dashed pencil. Private.
 - **DSP-to-DAW map** — the signal path, from converter to timeline. Private.
+- **DrumbBrain** — multi-mic drum recordings into an event stream, local-first. Research phase, no code yet.
 - **Filling gaps** — networking and low-level computing.
 
 <details>
-<summary><b>Older, and public</b> — archived coursework, 2022–2024</summary>
+<summary><b>Older, and public</b> — archived coursework, 2022–2024, and some C from 2025</summary>
 
 <br>
 
@@ -97,6 +66,7 @@ design.
 - [Statistik](https://github.com/Danneftw1/Statistik)
 - [Linear-Algebra-Python](https://github.com/Danneftw1/Linear-Algebra-Python)
 - [Python-Daniel-Nilsson](https://github.com/Danneftw1/Python-Daniel-Nilsson)
+- [C](https://github.com/Danneftw1/C)
 
 </details>
 
@@ -105,7 +75,7 @@ design.
 
 <br>
 
-Daniel Nilsson. Exploratory developer and drummer. Göteborg (Gothenburg), Sweden.
+Daniel Nilsson. AI engineer: LLM engineering, full-stack. Göteborg (Gothenburg), Sweden.
 
 **Now:** innovation developer at Quokka, Gothenburg, building AI-powered products end to end:
 prompt design, multi-stage LLM pipelines, TypeScript and Python services, Azure infrastructure.
@@ -119,22 +89,22 @@ and prompt iteration.
 React + Vite · Express · pnpm monorepo · App Service · Cosmos DB · Key Vault · Entra External ID (B2C) ·
 Bicep · GitHub Actions · Claude Code / Cursor workflows · AI-assisted code review and PR automation.
 
-**Education:** AI and machine learning programme at IT-högskolan, 2022–2024; archived public coursework.
+**Education:** AI and machine learning at IT-högskolan; archived public coursework, 2022–2024.
+Some C, 2025.
 
-**Neon Sumi:** an open-source status line for Claude Code, with matching themes.
+**Side projects** (hobby, mostly private): Neon Sumi, an open-source status line for Claude Code ·
+Claude Code setup · genealogy site · DSP-to-DAW map ·
+DrumbBrain (research phase, no code yet) · filling gaps in networking and low-level computing.
 
-**Side projects** (hobby, mostly private): recording pipeline · DrumbBrain (research phase, no code yet) ·
-Claude Code setup · genealogy site · DSP-to-DAW map · filling gaps in networking and low-level computing.
-
-**Drums:** seventeen years, playing and recording, multi-mic, never quantized.
-
-**Keyboards:** building and modding mechanical keyboards since 2012.
+**Drums:** seventeen years, playing and recording.
 
 </details>
 
 ---
 
-<sub>The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
+<sub>The page is drawn in Tecken, the character-cell design system my project hub runs on, cut heavier:
+one face, square cells, the inverse cell for what is current, and Neon Sumi's magenta only for the one project that
+broke free and wears its own design. The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
 Tecken, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
 text characters, the way donut.c draws its torus — and checks the palette for contrast and
 colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
