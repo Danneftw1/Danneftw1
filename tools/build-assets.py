@@ -4,13 +4,13 @@ system Navet runs on, cut bolder for a page that is only one person.
 
   header     the name at display size, and Navet's wheel drawn as characters
              (donut.c generalised to a wheel), turning on a fixed axle while
-             one amber spoke tumbles beside it, free of the rim
+             one magenta spoke tumbles beside it, free of the rim
   pipeline   how a request moves, written as one bar of a step sequencer:
              one channel per stage, hits drawn from the luminance ramp, and an
              inverse-video playhead that walks the bar at 96 BPM
   stack      every tool as a square tag on the stage it serves
   record     a log: what is current wears the inverse cell, what ended is
-             dashed, the one thing that broke free is amber
+             dashed, the one thing that broke free is magenta
 
 The rules the drawing keeps, all of them Tecken's:
 
@@ -22,8 +22,9 @@ The rules the drawing keeps, all of them Tecken's:
     the display cut, semi-expanded for anything a person wrote;
   * square corners, one wire weight, no shadow, no gradient. Emphasis is the
     inverse cell — ink ground, void text — and nothing else;
-  * one hue, and it means one thing: amber is what broke free of the hub and
-    wears its own design. Never hue alone: it always carries a word;
+  * one hue, and it means one thing: Neon Sumi's magenta is what broke free
+    of the hub and wears its own design. Never hue alone: it always carries
+    a word;
   * natt first: the dark file is Tecken's night, the light file its day;
   * the weight of the ink is the certainty: the one approximate fact (drums
     since ~2009) is dashed, and anything undated is not drawn;
@@ -106,15 +107,18 @@ def secs(t: float) -> str:
 # ------------------------------------------------------------------- palette
 
 # Tecken's tokens, verbatim from Navet Live: natt (night) first, dag (day).
+# The one accent is Neon Sumi's: its neon magenta (#ff2ec4) at night, and the
+# same hue taken down to 70 % by day so it still reads 5:1 on paper. free_deep
+# is the tag's fill: the ground with a tenth or so of that magenta in it.
 NATT = {
     "void": "#0a0b0c", "cell": "#131518", "grid": "#25292d", "wire": "#646b72",
     "ink": "#eceee9", "dim": "#a6aca8", "faint": "#8b918e", "on_ink": "#0a0b0c",
-    "free": "#ffb454", "free_deep": "#2e2110",
+    "free": "#ff2ec4", "free_deep": "#270f22",
 }
 DAG = {
     "void": "#f2f2ee", "cell": "#ffffff", "grid": "#dadbd4", "wire": "#7d8079",
     "ink": "#0c0d0e", "dim": "#45494b", "faint": "#5c605d", "on_ink": "#f2f2ee",
-    "free": "#8f4e00", "free_deep": "#fbeedd",
+    "free": "#b22089", "free_deep": "#ffeaf9",
 }
 PAGE = {"light": "#ffffff", "dark": "#0d1117"}
 THEMES = ("light", "dark")
@@ -186,7 +190,7 @@ def _lab(lin: list[float]) -> tuple[float, float, float]:
 
 
 def check_cvd() -> None:
-    """Amber never works alone — it always carries a word — but the free
+    """Magenta never works alone — it always carries a word — but the free
     spoke still has to part from the wheel's own greys for a reader with a
     colour-vision deficiency. Daniel runs a daltonized theme. ΔE76 ≥ 15."""
     fails, worst = [], 999.0
@@ -335,7 +339,7 @@ TAG_SIZE = 31
 
 def tag(t: dict, x: float, row: float, text: str, kind: str = "plain") -> tuple[str, float]:
     """Tecken's tag: a square cell with a wire edge. `now` is the inverse cell,
-    `free` the amber one, `ended` dashed and faint."""
+    `free` the magenta one, `ended` dashed and faint."""
     tw = measure("machine-bold", text, TAG_SIZE, 0.04)
     w = tw + 24
     y = row * ROW + (ROW - TAG_H) / 2
@@ -555,12 +559,13 @@ def wheel_css() -> str:
 
 # -------------------------------------------------------------------- header
 
-HEADER_ROWS = 15
+HEADER_ROWS = 16
 HEADER_H = HEADER_ROWS * ROW
 LINES = (  # tag, kind, what is current
     ("now", "now", "Innovation developer at Quokka"),
     ("build", "plain", "LLM pipelines, end to end"),
-    ("drums", "plain", "Seventeen years, playing and recording"),
+    ("free", "free", "Neon Sumi, a status line for Claude Code"),
+    ("drums", "plain", "Seventeen years, recorded, never quantized"),
 )
 
 
@@ -581,7 +586,7 @@ def header(t: dict, motion: bool = True) -> str:
     add(label("display", "Daniel", 136, PAD - 6, 7 * ROW - 66, t["ink"], -0.03, fit=620)[0])
     add(label("display", "Nilsson", 136, PAD - 6, 10 * ROW - 34, t["ink"], -0.03, fit=620)[0])
 
-    lede = "LLM engineering, full-stack."
+    lede = "Exploratory developer, drummer."
     add(label("human", lede, 32, PAD, baseline(10.5, "human", 32), t["dim"])[0])
     cx = PAD + measure("human", lede, 32) + 10
     # The cursor: one inverse cell, blinking on the beat. Its rest pose is lit.
@@ -678,7 +683,7 @@ def pipeline(t: dict, motion: bool = True) -> str:
 
 STACK = (
     ("model", "prompts, parallel calls, traces, evals",
-     ("Azure OpenAI", "AI Foundry", "MCP servers", "Langfuse")),
+     ("Azure OpenAI", "Microsoft Foundry", "MCP servers", "Langfuse")),
     ("serve", "the services the pipelines run in",
      ("TypeScript", "Python", "Flask", "React + Vite", "Express", "pnpm monorepo")),
     ("cloud", "Azure underneath, written as code",
@@ -731,13 +736,14 @@ def stack(t: dict, motion: bool = False) -> str:
 
 # -------------------------------------------------------------------- record
 
+KEYBOARDS_FROM = 2012
 RECORD = (  # when, tag, tag kind, what, detail
     ("now", "now", "now", "Quokka", "innovation developer"),
     ("now", "now", "now", "Side projects", "hobby, mostly private"),
     ("now", "free", "free", "Neon Sumi", "open source"),
     (f"~{DRUMS_FROM}", "now", "now", "Drums", "playing and recording"),
-    ("2025", "ended", "ended", "Some C", "public repo"),
-    ("2022–2024", "ended", "ended", "IT-högskolan", "AI and ML coursework"),
+    (f"{KEYBOARDS_FROM}", "now", "now", "Keyboards", "building and modding"),
+    ("2022–2024", "ended", "ended", "IT-högskolan", "AI and ML programme"),
 )
 REC_ROWS = len(RECORD) + 2
 REC_H = REC_ROWS * ROW
@@ -769,20 +775,21 @@ def record(t: dict, motion: bool = False) -> str:
 # Each file's <desc> and the README's alt text are the same string; the check
 # holds them equal, so a reader who cannot see the panel gets every fact on it.
 ALT = {
-    "header": ("Daniel Nilsson — LLM engineering, full-stack, Göteborg. The name in heavy condensed type beside "
-               "a wheel drawn in text characters, turning, with one amber spoke that has broken free of the rim. "
-               "Three lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, "
-               "seventeen years, playing and recording."),
+    "header": ("Daniel Nilsson — exploratory developer and drummer, Göteborg. The name in heavy condensed type "
+               "beside a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free "
+               "of the rim. Four lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; "
+               "free, Neon Sumi, a status line for Claude Code; drums, seventeen years, recorded, never quantized."),
     "pipeline": ("How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then "
                  "three parallel model calls fire together as a chord. The content filter sends one call back "
                  "to retry; it fires again and passes the filter. The result becomes structured output and is "
                  "served. Traces tick on every step; the bar ends with an eval and a prompt iteration."),
     "stack": "Stack, grouped by where each tool acts. " + " ".join(
         f"{name.title()}: {' · '.join(tools)}." for name, _, tools in STACK),
-    "record": ("Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly "
-               "private; Neon Sumi, open source, tagged free in amber because it wears its own design; drums, playing and "
-               f"recording since about {DRUMS_FROM}, dashed because the year is approximate. Ended: some C, "
-               "2025; IT-högskolan, AI and ML coursework, 2022–2024."),
+    "record": ("Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly private; "
+               "Neon Sumi, open source, tagged free in neon magenta because it wears its own design; "
+               f"drums, playing and recording since about {DRUMS_FROM}, dashed because the year is approximate; "
+               f"keyboards, building and modding since {KEYBOARDS_FROM}. Ended: IT-högskolan, AI and ML programme, "
+               "2022–2024."),
 }
 
 
