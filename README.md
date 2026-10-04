@@ -3,16 +3,13 @@
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/header-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-  <img alt="Daniel Nilsson — LLM engineering, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one amber spoke that has broken free of the rim. Three lines: now, innovation developer at Quokka; build, LLM pipelines, end to end; drums, seventeen years, playing and recording." src="assets/header-light.svg" width="100%">
+  <img alt="Daniel Nilsson — AI engineer, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one amber spoke that has broken free of the rim. Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end." src="assets/header-light.svg" width="100%">
 </picture>
 
 I build LLM pipelines and the products around them: multi-stage prompts, parallel model calls,
 the TypeScript and Python services that run them, and the Azure infrastructure underneath.
 Innovation developer at **Quokka** in Gothenburg, building AI-powered products end to end.
-I have played and recorded drums for seventeen years. The page is drawn in Tecken, the
-character-cell design system my project hub runs on, cut heavier: one face, square cells, the
-inverse cell for what is current, and amber only for the one project that broke free and wears
-its own design.
+I have played and recorded drums for seventeen years.
 
 ## How I build
 
@@ -21,13 +18,8 @@ its own design.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/pipeline-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/pipeline-light.svg">
-  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration." src="assets/pipeline-light.svg" width="100%">
+  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration. Legend: a heavy glyph is a stage firing, a colon is its answer coming back, a comma is a trace tick." src="assets/pipeline-light.svg" width="100%">
 </picture>
-
-- Multi-stage prompt design with structured output
-- Parallel model calls, fan-out and fan-in, with content-filter and retry handling
-- Traces, evals and prompt iteration
-- Infrastructure as code and deploy pipelines
 
 ## Stack
 
@@ -36,16 +28,8 @@ its own design.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/stack-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/stack-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/stack-light.svg">
-  <img alt="Stack, grouped by where each tool acts. Model: Azure OpenAI · AI Foundry · MCP servers · Langfuse. Serve: TypeScript · Python · Flask · React + Vite · Express · pnpm monorepo. Cloud: App Service · Cosmos DB · Key Vault · Entra External ID (B2C) · Bicep. Ship: GitHub Actions · Claude Code · Cursor · AI-assisted code review · PR automation." src="assets/stack-light.svg" width="100%">
+  <img alt="Stack, grouped by where each tool acts. Model: Azure OpenAI · Microsoft Foundry · Langfuse. Serve: TypeScript · Python. Ship: Bicep · GitHub Actions · Claude Code." src="assets/stack-light.svg" width="100%">
 </picture>
-
-**Model** — prompts, parallel model calls, traces and evals. Azure OpenAI · AI Foundry · MCP servers · Langfuse
-
-**Serve** — the services and frontends the pipelines run in. TypeScript · Python/Flask · React + Vite · Express · pnpm monorepo
-
-**Cloud** — Azure underneath, written as code. App Service · Cosmos DB · Key Vault · Entra External ID (B2C) · Bicep
-
-**Ship** — deploy pipelines and an AI-assisted dev loop. GitHub Actions · Claude Code / Cursor workflows · AI-assisted code review and PR automation
 
 ## Record
 
@@ -54,16 +38,10 @@ its own design.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record, as a log. Now: innovation developer at Quokka; side projects, hobby, mostly private; Neon Sumi, open source, tagged free in amber because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: some C, 2025; IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
+  <img alt="Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in amber because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
 </picture>
 
-<sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown.</sub>
-
-- **Innovation developer, Quokka** — Gothenburg, now
-- **Side projects** — now, hobby, mostly private
-- **Drums** — playing and recording since about 2009, seventeen years
-- **C** — public repo, 2025
-- **IT-högskolan** — AI and machine learning studies, archived public coursework 2022–2024
+<sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown; a dash is a start that is not on record.</sub>
 
 ## Now
 
@@ -97,7 +75,7 @@ its own design.
 
 <br>
 
-Daniel Nilsson. LLM engineering, full-stack. Göteborg (Gothenburg), Sweden.
+Daniel Nilsson. AI engineer: LLM engineering, full-stack. Göteborg (Gothenburg), Sweden.
 
 **Now:** innovation developer at Quokka, Gothenburg, building AI-powered products end to end:
 prompt design, multi-stage LLM pipelines, TypeScript and Python services, Azure infrastructure.
@@ -107,7 +85,7 @@ Start date not listed.
 parallel model calls, fan-out and fan-in · infrastructure as code · deploy pipelines · traces, evals
 and prompt iteration.
 
-**Stack:** Azure OpenAI · AI Foundry · MCP servers · Langfuse · TypeScript · Python · Flask ·
+**Stack:** Azure OpenAI · Microsoft Foundry · MCP servers · Langfuse · TypeScript · Python · Flask ·
 React + Vite · Express · pnpm monorepo · App Service · Cosmos DB · Key Vault · Entra External ID (B2C) ·
 Bicep · GitHub Actions · Claude Code / Cursor workflows · AI-assisted code review and PR automation.
 
@@ -124,7 +102,9 @@ DrumbBrain (research phase, no code yet) · filling gaps in networking and low-l
 
 ---
 
-<sub>The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
+<sub>The page is drawn in Tecken, the character-cell design system my project hub runs on, cut heavier:
+one face, square cells, the inverse cell for what is current, and amber only for the one project that
+broke free and wears its own design. The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
 Tecken, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
 text characters, the way donut.c draws its torus — and checks the palette for contrast and
 colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
