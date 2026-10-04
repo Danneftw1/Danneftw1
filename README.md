@@ -3,7 +3,7 @@
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/header-static-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-  <img alt="Daniel Nilsson — AI engineer, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one amber spoke that has broken free of the rim. Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end." src="assets/header-light.svg" width="100%">
+  <img alt="Daniel Nilsson — AI engineer, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free of the rim. Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end." src="assets/header-light.svg" width="100%">
 </picture>
 
 I build LLM pipelines and the products around them: multi-stage prompts, parallel model calls,
@@ -38,14 +38,14 @@ I have played and recorded drums for seventeen years.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in amber because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
+  <img alt="Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in neon magenta because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
 </picture>
 
 <sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown; a dash is a start that is not on record.</sub>
 
 ## Now
 
-- **[Neon Sumi](https://github.com/Danneftw1/nami-sumi-cc-statusline)** — a status line for Claude Code that
+- **[Neon Sumi](https://github.com/Danneftw1/neon-sumi)** — a status line for Claude Code that
   shows context, limits, the PR and the ports that are up. Free and open source.
 - **Claude Code setup** — hooks, subagents, slash commands and MCP config, plus a plain-text ledger. Private.
 - **Genealogy site** — two family lines; every fact is graded by how well it is sourced, and the grade
@@ -103,7 +103,7 @@ DrumbBrain (research phase, no code yet) · filling gaps in networking and low-l
 ---
 
 <sub>The page is drawn in Tecken, the character-cell design system my project hub runs on, cut heavier:
-one face, square cells, the inverse cell for what is current, and amber only for the one project that
+one face, square cells, the inverse cell for what is current, and Neon Sumi's magenta only for the one project that
 broke free and wears its own design. The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
 Tecken, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
 text characters, the way donut.c draws its torus — and checks the palette for contrast and
