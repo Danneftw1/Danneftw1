@@ -8,6 +8,6 @@
     "test": "npm run build && npm run check"
   },
   "devDependencies": {
-    "playwright": "^1.56.1"
+    "playwright": "^1.63.0"
   }
 }

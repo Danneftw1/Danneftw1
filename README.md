@@ -14,11 +14,11 @@ I have played and recorded drums for seventeen years.
 ## How I build
 
 <picture>
-  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/pipeline-static-dark.svg">
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/pipeline-static-light.svg">
+  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/pipeline-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/pipeline-light.svg">
-  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration. Legend: a heavy glyph is a stage firing, a colon is its answer coming back, a comma is a trace tick." src="assets/pipeline-light.svg" width="100%">
+  <img alt="How a request moves: the same wheel, stopped and seen face on. One request is one turn, and each of the eight spokes is a stage, read clockwise from the top: prompt; model a, model b, model c, three parallel calls; filter; output; trace; eval. The model b spoke is drawn twice: it fired twice, because the filter sent it back, and it passed." src="assets/pipeline-light.svg" width="100%">
 </picture>
 
 ## Stack
@@ -28,7 +28,7 @@ I have played and recorded drums for seventeen years.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/stack-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/stack-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/stack-light.svg">
-  <img alt="Stack, grouped by where each tool acts. Model: Azure OpenAI · Microsoft Foundry · Langfuse. Serve: TypeScript · Python. Ship: Bicep · GitHub Actions · Claude Code." src="assets/stack-light.svg" width="100%">
+  <img alt="Stack, as the hub in section, three rings drawn in text characters, read from the outside in. The outer ring is ship: Bicep · GitHub Actions · Claude Code. The middle ring is serve: TypeScript · Python. The inner ring is model: Azure OpenAI · Microsoft Foundry · Langfuse." src="assets/stack-light.svg" width="100%">
 </picture>
 
 ## Record
@@ -38,10 +38,9 @@ I have played and recorded drums for seventeen years.
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in neon magenta because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
+  <img alt="Record, as a track: one row of text characters from 2009 to now, one cell per quarter, heavier where more was going on, labelled on the track: drums, since about 2009, dashed at the start because the year is approximate; IT-högskolan 2022–2024, the heavier stretch; now, the last cell, an inverse cell. Under it, what is on the track: Drums, playing and recording; IT-högskolan, AI and ML coursework, ended; Quokka, innovation developer, start not on record; Neon Sumi, hobby, open source, start not on record, in neon magenta because it wears its own design." src="assets/record-light.svg" width="100%">
 </picture>
 
-<sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown; a dash is a start that is not on record.</sub>
 
 ## Now
 
