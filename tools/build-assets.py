@@ -643,13 +643,18 @@ LIGHT = (0.0, math.sqrt(0.5), -math.sqrt(0.5))   # donut.c's light: up and towar
 FACE = 0.22   # the still figures lean back this far off the view axis, so their tubes shade
 
 
-def _wheel_geo(dish: float = DISH) -> list:
+def _wheel_geo(dish: float = DISH, double: tuple = ()) -> list:
+    """The header's wheel. A spoke in `double` is drawn twice, side by side:
+    the stage that fired twice."""
     geo = list(_torus(RIM_R, RIM_T, 480, 12)) + list(_torus(NAVE_R, NAVE_T, 160, 12))
     for k in range(SPOKES):
         a = 2 * math.pi * k / SPOKES
         ca, sa = math.cos(a), math.sin(a)
-        geo += list(_cylinder((SPOKE_IN * ca, SPOKE_IN * sa, dish), (SPOKE_OUT * ca, SPOKE_OUT * sa, 0.0),
-                              SPOKE_T, -0.16, 1.03, 48, 10))
+        for off in ((-0.055, 0.055) if k in double else (0.0,)):
+            ox, oy = -sa * off, ca * off
+            geo += list(_cylinder((SPOKE_IN * ca + ox, SPOKE_IN * sa + oy, dish),
+                                  (SPOKE_OUT * ca + ox, SPOKE_OUT * sa + oy, 0.0),
+                                  SPOKE_T, -0.16, 1.03, 48, 10))
     return geo
 
 
@@ -712,14 +717,14 @@ class Still:
 
 # The header's wheel, stopped and seen face on: one request is one turn, and
 # every spoke is a stage the real pipeline runs, read clockwise from the top.
-# The one that left the rim is the retry — the filter sent it back, it fired
-# again and passed. Nothing is decoration.
+# The spoke drawn twice is the call the filter sent back: it fired again and
+# passed. Nothing is decoration.
 STAGES = ("prompt", "model · a", "model · b", "model · c", "filter", "output", "trace", "eval")
+TWICE = (2,)                  # model · b fires twice
 PIPE_ROWS = 17
 PIPE_H = PIPE_ROWS * ROW
 PIPE_GRID = (44, 24)          # cells: 528 × 480 units
 LABEL_R = 1.30                # spoke labels sit on their spoke's line, this far out
-RETRY_AT = math.radians(-20)  # the retry hangs just below three o'clock, outside the rim
 PIPE_X0 = (W - PIPE_GRID[0] * 12) / 2
 PIPE_Y0 = 3.25 * ROW
 
@@ -734,12 +739,7 @@ def pipeline(t: dict, motion: bool = False) -> str:
     cols, rows = PIPE_GRID
     st = Still(cols, rows, cx=cols * 0.5, cy=rows * 0.5)
     m = _pose(0.0, math.pi / 2, FACE)           # spoke 0 straight up
-    st.draw(_wheel_geo(), m)
-    # the retry: a spoke outside the rim, radial, posed in view space
-    view = _pose(0.0, 0.0, 0.0)
-    ca, sa = math.cos(RETRY_AT), math.sin(RETRY_AT)
-    st.draw(_rod_geo((1.10 * ca, 1.10 * sa, 0.0), ((1.10 + SPOKE_LEN) * ca, (1.10 + SPOKE_LEN) * sa, 0.0), 0.05),
-            view, layer_of="bright")
+    st.draw(_wheel_geo(double=TWICE), m)
     add(st.svg(t, PIPE_X0, PIPE_Y0))
 
     # one label per spoke, on the spoke's own line, clear of the rim. The pose
@@ -751,14 +751,11 @@ def pipeline(t: dict, motion: bool = False) -> str:
         dx, dy = px - cx_px, py - cy_px
         anchor = "start" if dx > 40 else "end" if dx < -40 else "middle"
         y = py + (-6 if dy < -40 else 30 if dy > 40 else 11)
-        ink = t["ink"] if name.startswith("model") or name == "prompt" else t["dim"]
-        add(label("machine", name, 31, px, y, ink, anchor=anchor)[0])
-    rx, ry = st.at(view, ((1.22 + SPOKE_LEN) * ca, (1.22 + SPOKE_LEN) * sa, 0.0), PIPE_X0, PIPE_Y0)
-    add(label("machine-bold", "retry", 32, rx, ry + 11, t["ink"])[0])
+        add(label("machine", name, 31, px, y, t["ink"], anchor=anchor)[0])
 
-    add(rule(t, (PIPE_ROWS - 2.5) * ROW, PAD, W - PAD))
-    add(label("machine", "filter sent one call back; it fired again and passed", 31,
-              PAD, baseline(PIPE_ROWS - 2), t["faint"], fit=W - 2 * PAD)[0])
+    add(rule(t, (PIPE_ROWS - 2) * ROW, PAD, W - PAD))
+    add(label("machine", "model · b fired twice: filter sent it back, it passed", 31,
+              PAD, baseline(PIPE_ROWS - 1.5), t["faint"], fit=W - 2 * PAD)[0])
     add(edge(t, PIPE_H))
     return svg(W, PIPE_H, "How a request moves", ALT["pipeline"], "", out)
 
@@ -778,7 +775,7 @@ STACK = (
 )
 RINGS = (0.40, 0.70, 1.0)       # model, serve, ship
 RING_T = 0.06
-RING_LEAD = (-0.35, 0.7, 1.4)   # the angle each ring's leader leaves at, inner to outer
+RING_LEAD = (-0.5, 0.55, 1.3)   # the angle each ring's leader leaves at, inner to outer
 STACK_ROWS = 12
 STACK_H = STACK_ROWS * ROW
 STACK_GRID = (36, 24)
@@ -820,7 +817,7 @@ def stack(t: dict, motion: bool = False) -> str:
         px, py = st.at(m, (ro * math.cos(a), ro * math.sin(a), 0.0), STACK_X0, STACK_Y0)
         lines = _tool_rows(tools, fit)
         top = py - (len(lines) + 1) * LINE / 2   # the block is centred on its leader
-        add(f'<path d="M{px:.1f} {py:.1f}H{LABEL_X - 16}" stroke="{t["grid"]}" stroke-width="2.5"/>')
+        add(f'<path d="M{px:.1f} {py:.1f}H{LABEL_X - 16}" stroke="{t["wire"]}" stroke-width="2.5"/>')
         add(label("machine-bold", group, 32, LABEL_X, top + LINE - 4, t["ink"])[0])
         for i, line in enumerate(lines):
             add(label("machine", line, 31, LABEL_X, top + (i + 2) * LINE - 4, t["dim"], fit=fit)[0])
@@ -830,20 +827,26 @@ def stack(t: dict, motion: bool = False) -> str:
 
 # -------------------------------------------------------------------- record
 
-# The track: time, from the first thing on record to now, one cell per quarter.
-# The ink is how much was going on; the approximate start is dashed; the
-# current end wears the inverse cell. Under it, the facts as rows.
-RECORD = (  # since, until (None = now), what, detail, kind
-    (f"~{DRUMS_FROM}", None, "Drums", "playing and recording", "approx"),
-    ("2022", "2024", "IT-högskolan", "AI and ML coursework", "ended"),
-    ("—", None, "Quokka", "innovation developer", "now"),
-    ("—", None, "Neon Sumi", "hobby, open source", "free"),
+# The track: time, from the first thing on record to now, one cell per quarter,
+# labelled on the track itself. The ink is how much was going on; the
+# approximate start is dashed; the current end wears the inverse cell. Under
+# it, what is on the track, as rows without dates: the track holds the dates.
+RECORD = (  # what, detail, kind
+    ("Drums", "playing and recording", "now"),
+    ("IT-högskolan", "AI and ML coursework", "ended"),
+    ("Quokka", "innovation developer", "now"),
+    ("Neon Sumi", "hobby, open source", "free"),
 )
+STUDY = (2022.0, 2024.75)
 TRACK_FROM, TRACK_TO = DRUMS_FROM, NOW_YEAR + 0.75
 TRACK_CELLS = int((TRACK_TO - TRACK_FROM) * 4)   # quarters
 TRACK_X0 = (W - TRACK_CELLS * 12) / 2
 REC_ROWS = 10
 REC_H = REC_ROWS * ROW
+
+
+def _track_x(year: float) -> float:
+    return TRACK_X0 + (year - TRACK_FROM) * 48
 
 
 def record(t: dict, motion: bool = False) -> str:
@@ -861,7 +864,7 @@ def record(t: dict, motion: bool = False) -> str:
             inv.append(i)                                       # now
         elif year < 2012 and i % 2:                             # the approximate start, dashed
             continue
-        elif 2022 <= year < 2024.75:                            # drums all along; the coursework on top
+        elif STUDY[0] <= year < STUDY[1]:                       # drums all along; the coursework on top
             uses["bright"].append(f'<use href="#r9" x="{i}"/>')
         else:
             uses["dim"].append(f'<use href="#r6" x="{i}"/>')
@@ -871,23 +874,18 @@ def record(t: dict, motion: bool = False) -> str:
         + "".join(f'<g fill="{ink[ly]}">{"".join(u)}</g>' for ly, u in uses.items() if u) + "</g>")
     for i in inv:
         add(f'<rect x="{TRACK_X0 + i * 12:.1f}" y="{y_track}" width="12" height="20" fill="{t["ink"]}"/>')
-    for year, anchor in ((TRACK_FROM, "start"), (2015, "middle"), (2020, "middle"), (NOW_YEAR, "end")):
-        x = TRACK_X0 + TRACK_CELLS * 12 if anchor == "end" else TRACK_X0 + (year - TRACK_FROM) * 48 + (6 if anchor == "middle" else 0)
-        add(label("machine", str(year), 31, x, baseline(3.5), t["faint"], anchor=anchor)[0])
+    # the track's own labels: what each stretch is
+    add(label("machine", f"drums, since about {DRUMS_FROM}", 31, TRACK_X0, baseline(3.4), t["faint"])[0])
+    add(label("machine", "now", 31, TRACK_X0 + TRACK_CELLS * 12, baseline(3.4), t["ink"], anchor="end")[0])
+    add(label("machine", f"IT-högskolan {int(STUDY[0])}–{int(STUDY[1])}", 31, _track_x(STUDY[1]),
+              baseline(4.3), t["ink"], anchor="end")[0])
 
-    add(rule(t, 5 * ROW, PAD, W - PAD))
-    for i, (since, until, what, detail, kind) in enumerate(RECORD):
-        row = 5.25 + i
-        when = since if until is None else f"{since}–{until}"
-        faint = t["faint"]
-        main = faint if kind == "ended" else t["free"] if kind == "free" else t["ink"]
-        add(label("machine", when, 31, PAD, baseline(row), faint)[0])
-        if kind == "approx":   # the one approximate fact is dashed, never solid
-            wd = measure("machine", when, 31)
-            add(f'<path d="M{PAD} {baseline(row) + 9:.1f}H{PAD + wd:.1f}" stroke="{faint}" '
-                f'stroke-width="3" stroke-dasharray="8 6"/>')
-        add(label("machine-bold", what, 32, 300, baseline(row, "machine-bold", 32), main, fit=620 - 300)[0])
-        add(label("machine", detail, 31, 620, baseline(row), faint, fit=W - PAD - 620)[0])
+    add(rule(t, 5.5 * ROW, PAD, W - PAD))
+    for i, (what, detail, kind) in enumerate(RECORD):
+        row = 5.75 + i
+        main = t["faint"] if kind == "ended" else t["free"] if kind == "free" else t["ink"]
+        add(label("machine-bold", what, 32, PAD, baseline(row, "machine-bold", 32), main, fit=372 - PAD)[0])
+        add(label("machine", detail, 31, 372, baseline(row), t["faint"], fit=W - PAD - 372)[0])
     add(edge(t, REC_H))
     return svg(W, REC_H, "Record: the track, and what is on it", ALT["record"], "", out)
 
@@ -902,17 +900,17 @@ ALT = {
                "Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end."),
     "pipeline": ("How a request moves: the same wheel, stopped and seen face on. One request is one turn, and each "
                  "of the eight spokes is a stage, read clockwise from the top: prompt; model a, model b, model c, "
-                 "three parallel calls; filter; output; trace; eval. One spoke lies outside the rim, labelled retry: "
-                 "the filter sent one call back; it fired again and passed."),
-    "stack": ("Stack, as the hub in section, three rings drawn in text characters. " + " ".join(
-        f"The {('inner', 'middle', 'outer')[i]} ring is {name}: {' · '.join(tools)}."
-        for i, (name, _, tools) in enumerate(STACK))),
+                 "three parallel calls; filter; output; trace; eval. The model b spoke is drawn twice: it fired "
+                 "twice, because the filter sent it back, and it passed."),
+    "stack": ("Stack, as the hub in section, three rings drawn in text characters, read from the outside in. "
+              + " ".join(f"The {ring} ring is {name}: {' · '.join(tools)}."
+                         for ring, (name, _, tools) in zip(("outer", "middle", "inner"), reversed(STACK)))),
     "record": ("Record, as a track: one row of text characters from 2009 to now, one cell per quarter, heavier "
-               f"where more was going on. The start, drums since about {DRUMS_FROM}, is dashed because the year is "
-               "approximate; 2022 to 2024 is heavier for the IT-högskolan coursework; the last cell, now, is an "
-               "inverse cell. Under it, four rows: drums, playing and recording, since about 2009; IT-högskolan, "
-               "AI and ML coursework, 2022–2024, ended; Quokka, innovation developer, start not on record; "
-               "Neon Sumi, hobby, open source, start not on record, in neon magenta because it wears its own design."),
+               f"where more was going on, labelled on the track: drums, since about {DRUMS_FROM}, dashed at the "
+               "start because the year is approximate; IT-högskolan 2022–2024, the heavier stretch; now, the last "
+               "cell, an inverse cell. Under it, what is on the track: Drums, playing and recording; IT-högskolan, "
+               "AI and ML coursework, ended; Quokka, innovation developer, start not on record; Neon Sumi, hobby, "
+               "open source, start not on record, in neon magenta because it wears its own design."),
 }
 
 
