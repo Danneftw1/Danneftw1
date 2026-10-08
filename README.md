@@ -3,16 +3,6 @@ the TypeScript and Python services that run them, and the Azure infrastructure u
 Innovation developer at **Quokka** in Gothenburg, building AI-powered products end to end.
 I have played and recorded drums for seventeen years.
 
-## Record
-
-<picture>
-  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/record-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/record-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/record-light.svg">
-  <img alt="Record, as a log with columns since, state, what and detail. Now: innovation developer at Quokka, start not on record; Neon Sumi, hobby, open source, start not on record, tagged free in neon magenta because it wears its own design; drums, playing and recording since about 2009, dashed because the year is approximate. Ended: IT-högskolan, AI and ML coursework, 2022–2024." src="assets/record-light.svg" width="100%">
-</picture>
-
 <sub>Lit means current; the rest is ordered by when it ended. Only dates on record are shown; a dash is a start that is not on record.</sub>
 
 ## Now
