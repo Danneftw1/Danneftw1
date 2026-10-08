@@ -1,35 +1,7 @@
-<picture>
-  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/header-static-dark.svg">
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/header-static-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-  <img alt="Daniel Nilsson — AI engineer, full-stack, Göteborg. The name in heavy condensed type beside a wheel drawn in text characters, turning, with one neon magenta spoke that has broken free of the rim. Two lines: now, innovation developer at Quokka; build, LLM pipelines, end to end." src="assets/header-light.svg" width="100%">
-</picture>
-
 I build LLM pipelines and the products around them: multi-stage prompts, parallel model calls,
 the TypeScript and Python services that run them, and the Azure infrastructure underneath.
 Innovation developer at **Quokka** in Gothenburg, building AI-powered products end to end.
 I have played and recorded drums for seventeen years.
-
-## How I build
-
-<picture>
-  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/pipeline-static-dark.svg">
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/pipeline-static-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/pipeline-light.svg">
-  <img alt="How a request moves, drawn as one bar of a step sequencer. A multi-stage prompt fires, then three parallel model calls fire together as a chord. The content filter sends one call back to retry; it fires again and passes the filter. The result becomes structured output and is served. Traces tick on every step; the bar ends with an eval and a prompt iteration. Legend: a heavy glyph is a stage firing, a colon is its answer coming back, a comma is a trace tick." src="assets/pipeline-light.svg" width="100%">
-</picture>
-
-## Stack
-
-<picture>
-  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/stack-dark.svg">
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/stack-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/stack-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/stack-light.svg">
-  <img alt="Stack, grouped by where each tool acts. Model: Azure OpenAI · Microsoft Foundry · Langfuse. Serve: TypeScript · Python. Ship: Bicep · GitHub Actions · Claude Code." src="assets/stack-light.svg" width="100%">
-</picture>
 
 ## Record
 
