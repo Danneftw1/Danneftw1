@@ -7,7 +7,8 @@
 # It deliberately does not rebuild the SVGs. The build fetches fonts from
 # Google's CDN, and a CDN hiccup should never turn this red — the generated
 # files are committed, so what CI sees is what GitHub will serve.
-name: check
+name: 🪪 check
+run-name: "🪪 ${{ github.event.pull_request.title || format('check · {0} · {1}', github.event_name, github.ref_name) }}"
 on:
   push:
     branches: [main]
