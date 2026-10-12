@@ -66,7 +66,7 @@ DrumbBrain (research phase, no code yet) · filling gaps in networking and low-l
 
 <sub>The page is drawn in Ligma, the character-cell design system my project vibe cave runs on, cut heavier:
 one face, square cells, the inverse cell for what is current, and Neon Sumi's desuu magenta only for the one project that
-broke free and wears its own design. The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
+broke free and wears its own design. The artwork is generated, venerated, multi-gated, deeply faded, ultra-jaded. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
 Ligma, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
 text characters, the way donut.c draws its torus — and checks the palette for contrast and
 colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
