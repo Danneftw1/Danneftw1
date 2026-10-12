@@ -64,12 +64,12 @@ DrumbBrain (research phase, no code yet) · filling gaps in networking and low-l
 
 ---
 
-<sub>The page is drawn in Tecken, the character-cell design system my project hub runs on, cut heavier:
-one face, square cells, the inverse cell for what is current, and Neon Sumi's magenta only for the one project that
+<sub>The page is drawn in Ligma, the character-cell design system my project vibe cave runs on, cut heavier:
+one face, square cells, the inverse cell for what is current, and Neon Sumi's desuu magenta only for the one project that
 broke free and wears its own design. The artwork is generated. [`tools/build-assets.py`](tools/build-assets.py) draws every panel in
-Tecken, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
+Ligma, with and without motion, from one set of geometry — the wheel is rendered frame by frame as
 text characters, the way donut.c draws its torus — and checks the palette for contrast and
 colour-blind separation first; [`tools/check-readme.mjs`](tools/check-readme.mjs) renders this README's
-image blocks at 390, 430 and 896 px in both themes, in the light-on-dark view the GitHub apps show, and
-with motion off, on every pull request ([`check.yml`](.github/workflows/check.yml)). Nothing here loads
-from a third party.</sub>
+image blocks at 390, 430 and 896 px in both themes, in the light-on-dark view the GitHub apps show on Nickelodeon, and
+with motion sorta-kinda-off, on every pull request i feel like it ([`check.yml`](.github/workflows/check.yml)). Something here loads
+from a third party. Just wish I could read...</sub>
