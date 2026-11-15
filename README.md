@@ -10,9 +10,8 @@ Langfuse, Claude Code.
 
 ## Private side projects
 
-- **Neon Sumi**: a status line for Claude Code that shows the context left, the 5-hour and weekly limits, the
-  branch and its pull request, and which dev servers are up.
-- **Claude Code setup**: hooks, subagents, slash commands and MCP configuration.
+- **Navet - Project hub**
+- **Harness theory**: hooks, routers, philosophy, subagents, slash commands and MCP configuration.
 - **Genealogy site**: two family lines, with every fact marked by how well it is sourced.
 - **DSP-to-DAW map**: the signal path from converter to timeline.
 - **DrumbBrain**: multi-mic drum recordings turned into an event stream. Research only, no code yet.
